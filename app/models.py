@@ -244,11 +244,6 @@ class WorkSpecification(Base):
     specification = relationship("Specification", back_populates="work_specification")
 
 
-WorkSpecification.specification = relationship("Specification",
-                                               order_by=Specification.id,
-                                               back_populates="workSpecification")
-
-
 Specification.workSpecification = relationship("WorkSpecification",
                                                order_by=WorkSpecification.id,
                                                back_populates="specification")

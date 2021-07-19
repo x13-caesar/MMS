@@ -1,2 +1,11 @@
 class mysql_local:
-    address = 'mysql://root:199474@localhost:3306/mms'
+    url = 'mysql://root:199474@localhost:3306/mms'
+
+
+class aliyun:
+    url = 'mysql://omni:jyNnot-funxo8-wenqor@rm-bp14e5tr87texit' \
+              '7y0g0jfo.mysql.rds.aliyuncs.com:3306/mms'
+
+
+class aliyun_test:
+    url = 'mysql://omni:Omni00@yongfu-mms.mysql.rds.aliyuncs.com:3306/mms'
