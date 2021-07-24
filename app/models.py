@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Date, DateTime, Integer, String, Float, ForeignKey
+from sqlalchemy import Column, Date, DateTime, Integer, Boolean, String, Float, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from .database import Base
@@ -244,6 +244,15 @@ class WorkSpecification(Base):
     specification = relationship("Specification", back_populates="work_specification")
 
 
-Specification.workSpecification = relationship("WorkSpecification",
+Specification.work_specification = relationship("WorkSpecification",
                                                order_by=WorkSpecification.id,
                                                back_populates="specification")
+
+
+class User(Base):
+    __tablename__ = 'user'
+
+    username = Column(String, primary_key=True)
+    hashed_pwd = Column(String)
+    disabled = Column(Boolean)
+    role = Column(String)

@@ -1,15 +1,25 @@
 from fastapi import FastAPI
 import uvicorn
 from .routers import vendor, specification, component, batch, batch_process, buyer, delivery, employee, operation, \
-    process, process_component, product, salary, work, work_specification
+    process, process_component, product, salary, work, work_specification, user
+from .security import token
 
 app = FastAPI(
     title="Yongfu Manufacturing Management System API",
     description="Only for Yongfu Co. internal use. Regarding technical question please contact xuqiangwen1994@gmail.com",
     version="0.0.1", )
 
-controllers = [vendor, specification, component, batch, batch_process, buyer, delivery, employee, operation, \
-               process, process_component, product, salary, work, work_specification]
+controllers = [vendor, buyer,
+               product,
+               specification, component,
+               batch, batch_process, delivery,
+               employee, salary, work, work_specification,
+               process, process_component,
+               operation,
+               token,
+               user
+               ]
+
 for controller in controllers:
     app.include_router(controller.router)
 

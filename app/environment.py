@@ -3,8 +3,7 @@ class mysql_local:
 
 
 class aliyun:
-    url = 'mysql://omni:jyNnot-funxo8-wenqor@rm-bp14e5tr87texit' \
-              '7y0g0jfo.mysql.rds.aliyuncs.com:3306/mms'
+    url = 'mysql://omni:jyNnot-funxo8-wenqor@rm-bp14e5tr87t7y0g0jfo.mysql.rds.aliyuncs.com:3306/mms'
 
 
 class aliyun_test:

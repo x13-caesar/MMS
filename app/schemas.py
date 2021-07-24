@@ -309,3 +309,25 @@ class WorkSpecification(WorkSpecificationBase):
         orm_mode = True
 
 
+class UserBase(BaseModel):
+    username: str
+    disabled: bool
+    role: str
+
+
+class User(UserBase):
+    hashed_pwd: str
+
+    class Config:
+        orm_mode = True
+
+
+# token url相应模型
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+
+# 令牌数据模型
+class TokenData(BaseModel):
+    username: str = None
