@@ -7,7 +7,7 @@ from .database import Base
 class Vendor(Base):
     __tablename__ = 'vendor'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String)
     company = Column(String)
     payment_period = Column(String)
@@ -88,12 +88,11 @@ class Process(Base):
     process_name = Column(String)
     process_order = Column(Integer)
     notice = Column(String)
-    product = relationship('Product', back_populates='process')
 
 
 Product.process = relationship("Process",
                                order_by=Process.id,
-                               back_populates="product")
+                               backref="product")
 
 
 class ProcessComponent(Base):
@@ -103,17 +102,17 @@ class ProcessComponent(Base):
     process_id = Column(Integer, ForeignKey('process.id'))
     component_id = Column(String, ForeignKey('component.id'))
     attrition_rate = Column(Float)
-    process = relationship('Process', back_populates='process_component')
-    component = relationship('Component', back_populates='process_component')
+    consumption = Column(Integer)
 
 
 Process.process_component = relationship("ProcessComponent",
                                          order_by=ProcessComponent.id,
-                                         back_populates="process")
+                                         backref="process")
 
 Component.process_component = relationship("ProcessComponent",
                                            order_by=ProcessComponent.id,
-                                           back_populates="component")
+                                           backref="component")
+
 
 class Batch(Base):
     __tablename__ = 'batch'
@@ -128,12 +127,6 @@ class Batch(Base):
     end = Column(DateTime)
     ship = Column(DateTime)
     notice = Column(String)
-    product = relationship('Product', back_populates='batch')
-
-
-Product.batch = relationship("Batch",
-                             order_by=Batch.id,
-                             back_populates="product")
 
 
 class BatchProcess(Base):
@@ -145,17 +138,17 @@ class BatchProcess(Base):
     batch_id = Column(Integer, ForeignKey('batch.id'))
     start_amount = Column(Integer)
     end_amount = Column(Integer)
-    process = relationship('Process', back_populates='batch_process')
-    batch = relationship('Batch', back_populates='batch_process')
+    warehouse_record = relationship("WarehouseRecord", backref="batch_process")
+    # process = relationship("Process", back_populates="batch_process")
 
 
 Batch.batch_process = relationship("BatchProcess",
                                    order_by=BatchProcess.id,
-                                   back_populates="batch")
+                                   backref="batch")
 
 Process.batch_process = relationship("BatchProcess",
                                      order_by=BatchProcess.id,
-                                     back_populates="process")
+                                     backref="process")
 
 class Delivery(Base):
     __tablename__ = 'delivery'
@@ -174,13 +167,13 @@ class Delivery(Base):
 
 
 Product.delivery = relationship("Delivery",
-                                     order_by=Delivery.id,
-                                     back_populates="product")
+                                order_by=Delivery.id,
+                                back_populates="product")
 
 
 Buyer.delivery = relationship("Delivery",
-                                     order_by=Delivery.id,
-                                     back_populates="buyer")
+                              order_by=Delivery.id,
+                              back_populates="buyer")
 
 
 class Operation(Base):
@@ -226,11 +219,19 @@ class Work(Base):
     id = Column(Integer, primary_key=True)
     batch_process_id = Column(Integer, ForeignKey('batch_process.id'))
     employee_id = Column(Integer, ForeignKey('employee.id'))
+    employee_name = Column(String, ForeignKey('employee.name'))
     work_date = Column(DateTime)
     unit_pay = Column(Float)
     complete_unit = Column(Integer)
     hour_pay = Column(Float)
     complete_hour = Column(Integer)
+    # warehouse_record = relationship("WarehouseRecord",
+    #                                 primaryjoin="Work.batch_process_id == foreign(WarehouseRecord.batch_process_id)")
+
+
+BatchProcess.work = relationship("Work",
+                                 order_by=Work.id,
+                                 backref="batch_process")
 
 
 class WorkSpecification(Base):
@@ -238,12 +239,15 @@ class WorkSpecification(Base):
 
     id = Column(Integer, primary_key=True)
     work_id = Column(Integer, ForeignKey('work.id'))
-    specification_id = Column(Integer, ForeignKey('specification.id'))
+    specification_id = Column(String, ForeignKey('specification.id'))
     plan_amount = Column(Integer)
     actual_amount = Column(Integer)
     specification = relationship("Specification", back_populates="work_specification")
 
 
+Work.work_specification = relationship("WorkSpecification",
+                                       order_by=WorkSpecification.id,
+                                       backref="work")
 Specification.work_specification = relationship("WorkSpecification",
                                                order_by=WorkSpecification.id,
                                                back_populates="specification")
@@ -256,3 +260,14 @@ class User(Base):
     hashed_pwd = Column(String)
     disabled = Column(Boolean)
     role = Column(String)
+
+
+class WarehouseRecord(Base):
+    __tablename__ = 'warehouse_record'
+
+    id = Column(Integer, primary_key=True)
+    batch_process_id = Column(Integer, ForeignKey('batch_process.id'))
+    component_id = Column(String, ForeignKey('component.id'))
+    specification_id = Column(String, ForeignKey('specification.id'))
+    component_name = Column(String, ForeignKey('component.name'))
+    consumption = Column(Integer)

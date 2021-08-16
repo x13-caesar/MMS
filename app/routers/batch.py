@@ -33,8 +33,29 @@ def read_batches(db: Session = Depends(get_db)):
     return batches
 
 
+@router.get("/meta_info", response_model=List[schemas.Batch])
+def read_batches_meta_info(db: Session = Depends(get_db)):
+    batches = batch_service.get_batches_meta_info(db=db)
+    return batches
+
+
+@router.get("/unfinished", response_model=List[schemas.Batch])
+def read_unfinished_batches(db: Session = Depends(get_db)):
+    ongoing_batches = batch_service.get_batches_by_status('ongoing', db=db)
+    unstarted_batches = batch_service.get_batches_by_status('unstarted', db=db)
+    return ongoing_batches + unstarted_batches
+
+
 @router.get("/{batch_id}", response_model=schemas.Batch)
 def read_batch(batch_id: int, db: Session = Depends(get_db)):
+    batch = batch_service.get_batch(batch_id=batch_id, db=db)
+    if batch is None:
+        raise HTTPException(status_code=404, detail="Batch not found")
+    return batch
+
+
+@router.get("/meta_info/{batch_id}", response_model=schemas.Batch)
+def read_batch_meta_info(batch_id: int, db: Session = Depends(get_db)):
     batch = batch_service.get_batch(batch_id=batch_id, db=db)
     if batch is None:
         raise HTTPException(status_code=404, detail="Batch not found")
@@ -112,7 +133,7 @@ def read_batch_start_before(date: datetime, db: Session = Depends(get_db)):
 
 @router.post("/", response_model=schemas.Batch)
 def create_batch(batch: schemas.BatchCreate, db: Session = Depends(get_db)):
-    return batch_service.create_batch(batch=batch, db=db)
+    new_batch =  batch_service.create_batch(batch=batch, db=db)
 
 
 @router.put("/")

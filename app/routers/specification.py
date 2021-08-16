@@ -70,15 +70,16 @@ def read_specification_under_price(price: int, gross: bool, db: Session = Depend
         db=db)
 
 
-@router.post("/", response_model=schemas.Specification)
+@router.post("/")
 def create_specification(specification: schemas.SpecificationCreate, db: Session = Depends(get_db)):
-    db_specification = \
-        specification_service.get_specifications_by_component_id_and_vendor_id(
+    if specification_service.get_specification(specification_id=specification.id,
+                                                db=db):
+        raise HTTPException(status_code=400, detail="Existing ID")
+    elif specification_service.get_specifications_by_component_id_and_vendor_id(
             component_id=specification.component_id,
             vendor_id=specification.vendor_id,
-            db=db)
-    if db_specification:
-        raise HTTPException(status_code=400, detail="Specification already registered")
+            db=db):
+        raise HTTPException(status_code=400, detail="The vendor already has this component")
     return specification_service.create_specification(specification=specification, db=db)
 
 

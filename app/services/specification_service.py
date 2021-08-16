@@ -56,7 +56,7 @@ def create_specification(specification: schemas.SpecificationCreate, db: Session
     db.add(new_specification)
     db.commit()
     db.refresh(new_specification)
-    return new_specification
+    return {"success": True, "detail": new_specification.id}
 
 
 def update_specification(specification: schemas.Specification, db: Session):
@@ -73,4 +73,4 @@ def delete_specification(specification: schemas.Specification, db: Session):
         filter(models.Specification.id == specification.id). \
         delete(synchronize_session="fetch")
     db.commit()
-    return
+    return {"success": True, "detail": ''}

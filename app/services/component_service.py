@@ -5,7 +5,7 @@ from .. import models, schemas
 
 from . import specification_service
 
-def get_component(component_id: int, db: Session):
+def get_component(component_id: str, db: Session):
     return db.query(models.Component).filter(models.Component.id == component_id).first()
 
 
@@ -35,7 +35,8 @@ def create_component(component: schemas.ComponentCreate, db: Session):
     db.add(new_component)
     db.commit()
     db.refresh(new_component)
-    return new_component
+    new_id = new_component.id
+    return {"success": True, "detail": new_id}
 
 
 def update_component(component: schemas.Component, db: Session):

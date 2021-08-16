@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 import uvicorn
+from fastapi.middleware.cors import CORSMiddleware
+
 from .routers import vendor, specification, component, batch, batch_process, buyer, delivery, employee, operation, \
     process, process_component, product, salary, work, work_specification, user
 from .security import token
@@ -24,10 +26,21 @@ for controller in controllers:
     app.include_router(controller.router)
 
 
-# app.include_router(vendor.router)
-# app.include_router(specification.router)
-# app.include_router(component.router)
+origins = [
+    "http://localhost.tiangolo.com",
+    "https://localhost.tiangolo.com",
+    "http://localhost",
+    "http://localhost:8080",
+    "http://localhost:4200"
+]
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/")
 async def root():

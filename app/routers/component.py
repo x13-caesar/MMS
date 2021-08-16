@@ -24,7 +24,7 @@ def read_components(db: Session = Depends(get_db)):
 
 
 @router.get("/{component_id}", response_model=schemas.Component)
-def read_component(component_id: int, db: Session = Depends(get_db)):
+def read_component(component_id: str, db: Session = Depends(get_db)):
     component = component_service.get_component(component_id=component_id, db=db)
     if component is None:
         raise HTTPException(status_code=404, detail="Component not found")

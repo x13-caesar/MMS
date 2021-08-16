@@ -47,7 +47,7 @@ def read_vendor_by_company(company: str, db: Session = Depends(get_db)):
     return vendor
 
 
-@router.post("/", response_model=schemas.Vendor)
+@router.post("/")
 def create_vendor(vendor: schemas.VendorCreate, db: Session = Depends(get_db)):
     db_vendor = vendor_service.get_vendor_by_company(company=vendor.company, db=db)
     if db_vendor:

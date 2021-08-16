@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends
 from typing import List
+
 from .. import schemas
-from ..services import product_service
+from ..services import product_service, process_service, process_component_service
 from sqlalchemy.orm import Session
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
@@ -22,12 +23,26 @@ def read_products(db: Session = Depends(get_db)):
     return products
 
 
+@router.get("/only_name", response_model=List[schemas.Product])
+def read_products_names(db: Session = Depends(get_db)):
+    products = product_service.get_products_names(db=db)
+    return products
+
+
 @router.get("/{product_id}", response_model=schemas.Product)
 def read_product(product_id: int, db: Session = Depends(get_db)):
     product = product_service.get_product(product_id=product_id, db=db)
     if product is None:
         raise HTTPException(status_code=404, detail="Product not found")
     return product
+
+
+@router.get("/only_name/{product_id}")
+def read_product_name(product_id: int, db: Session = Depends(get_db)):
+    product_name = product_service.get_product_name(product_id=product_id, db=db)
+    if product_name is None:
+        raise HTTPException(status_code=404, detail="Product not found")
+    return {'id': product_id, 'name': product_name}
 
 
 @router.get("/category/{category}")
@@ -67,8 +82,18 @@ def read_product_under_inventory(inventory: int, db: Session = Depends(get_db)):
         db=db)
 
 
-@router.post("/", response_model=schemas.Product)
+@router.post("/")
 def create_product(product: schemas.ProductCreate, db: Session = Depends(get_db)):
+    for process in product.process:
+        process.id = str(product.id) + str(process.process_order).rjust(2, '0')
+        process.product_id = product.id
+        for idx, process_component in enumerate(process.process_component):
+            process_component.id = str(process.id) + str(idx+1).rjust(2, '0')
+            process_component.process_id = process.id
+            process_component_service.create_process_component(process_component, db=db)
+        process.process_component = []
+        process_service.create_process(process, db=db)
+    product.process = []
     return product_service.create_product(product=product, db=db)
 
 

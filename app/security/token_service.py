@@ -16,22 +16,20 @@ ACCESS_TOKEN_EXPIRE_DAYS = 14
 
 def authenticate_user(username: str, password: str, db: Session):
     user = get_user(username=username, db=db)
-    print("GET USER")
-    validated = verify_password(password, str(user.hashed_pwd))
-    if not user or not validated:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    return user
+    if user:
+        validated = verify_password(password, str(user.hashed_pwd))
+        if validated:
+            return user
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Incorrect username or password",
+        headers={"WWW-Authenticate": "Bearer"})
 
 
 def create_access_token(*, data: dict, expires_delta: timedelta = None):
     to_encode = data.copy()
     expire = datetime.utcnow() + expires_delta
     to_encode.update({"exp": expire})
-    print(to_encode)
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 

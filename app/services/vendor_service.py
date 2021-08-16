@@ -25,7 +25,8 @@ def create_vendor(vendor: schemas.VendorCreate, db: Session):
     db.add(new_vendor)
     db.commit()
     db.refresh(new_vendor)
-    return new_vendor
+    new_id = new_vendor.id
+    return {"success": True, "detail": new_id}
 
 
 def update_vendor(vendor: schemas.Vendor, db: Session):
