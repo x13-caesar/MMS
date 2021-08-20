@@ -1,0 +1,223 @@
+/* You can add global styles to this file, and also import other style files */
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+/* You can add global styles to this file, and also import other style files */
+:root{
+  --logoblue: rgb(95, 141, 157);
+  --highlightblue: #3498db;
+  --lowkeyblue: #2980b9;
+  --deepblue: #2c3e50;
+  --darkblue: #34495e;
+  --infoyellow: #d35400;
+  --warnred: #c0392b;
+  --backwardgrey: #7f8c8d;
+  --bggrey: rgb(247,249,250);
+}
+
+.slogan {
+  color: var(--logoblue);
+}
+
+html, body {
+  height: 100%;
+  background-color: var(--bggrey);
+}
+
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+img.logo-normal {
+  width: 200px;
+}
+
+img.profile {
+  object-fit: cover;
+  width: 140px;
+  height: 140px;
+  position: relative;
+  overflow: hidden;
+  border-radius: 50%;
+}
+
+img.profile-small {
+  object-fit: cover;
+  width: 60px;
+  height: 60px;
+  position: relative;
+  overflow: hidden;
+  border-radius: 50%;
+}
+
+img.scenario {
+  object-fit: cover;
+  width: 400px;
+  height: 300px;
+  position: relative;
+  overflow: hidden;
+  border-radius: 5px;
+}
+
+img.scenario-small {
+  object-fit: cover;
+  width: 240px;
+  height: 160px;
+  position: relative;
+  overflow: hidden;
+  border-radius: 5px;
+}
+
+.sub-header {
+  margin: 25px 25px;
+  color: var(--darkblue);
+}
+
+.body-container {
+  width: 85%;
+  margin-top: 25px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.column-container {
+  margin: 25px;
+  height: 100%;
+}
+
+.row-container {
+  padding: 10px;
+  width: 100%;
+}
+
+.item-container {
+  margin: 5px;
+}
+
+.data-table {
+  width: 100%;
+}
+
+.fullfill {
+  width: 100%;
+}
+
+.nty-percent-fill {
+  width: 90%
+}
+
+.centered {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  /* bring your own prefixes */
+  transform: translate(-50%, -50%);
+}
+
+p.highlight, b.highlight {
+  color: var(--logoblue);
+  line-height: 2rem;
+}
+
+p.subtitle {
+  font-weight: bold;
+}
+
+p.whiteout {
+  color: whitesmoke;
+}
+
+p.info, b.info {
+  color: darkorange;
+}
+
+p.warn, b.warn {
+  color: var(--warnred)
+}
+
+p.success, b.success {
+  color: green;
+}
+
+button.chip {
+  margin: 5px;
+  color: white;
+  background-color: var(--deepblue);
+}
+
+button.call {
+  margin: 5px;
+  color: white;
+  background-color: var(--infoyellow);
+}
+
+button.action {
+  margin: 5px;
+  color: white;
+  background-color: var(--logoblue);
+}
+
+button.info {
+  margin: 5px;
+  color: white;
+  background-color: var(--infoyellow);;
+}
+
+button.warn {
+  margin: 5px;
+  color: white;
+  background-color: var(--warnred);;
+}
+
+button.next {
+  margin: 5px;
+  color: var(--logoblue);
+  border: groove 1px var(--logoblue);
+}
+
+button.back {
+  margin: 5px;
+  color: var(--backwardgrey);
+  border: groove 1px var(--backwardgrey);
+}
+
+button.option {
+  margin: 5px;
+  color: white;
+  background-color: var(--logoblue);
+  opacity: 0.5;
+}
+
+button.option:hover {
+  color: white;
+  opacity: 1;
+}
+
+.button-container {
+  position: relative;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.flex-container {
+  display: flex;
+  text-align:center;
+}
+
+.greybg {
+  background-color: lightgrey;
+}
+
+.greyborder {
+  border: 1px solid lightgrey;
+}
+
+div.distance {
+  padding: 2%
+}
+
+div.justify {
+  display:flex;
+  text-align: justify
+}

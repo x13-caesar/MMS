@@ -1,0 +1,52 @@
+<div class="body-container" fxLayout="column" fxLayoutAlign="space-between center">
+  <div class="button-container fullfill">
+    <mat-form-field appearance="standard" class="field-search">
+      <mat-label>搜索</mat-label>
+      <input matInput type="text" [formControl]="searchKeyword">
+    </mat-form-field>
+    <button mat-button class="call" (click)="openCreateVendorDialog()"> 添加新供应商 </button>
+  </div>
+
+  <div class="data-table">
+    <table mat-table
+           [dataSource]="dataSource"
+           class="mat-elevation-z8 data-table">
+      <ng-container matColumnDef="{{col}}" *ngFor="let col of displayedColumns">
+        <th mat-header-cell *matHeaderCellDef>{{col.toUpperCase()}}</th>
+        <td mat-cell *matCellDef="let element">
+          <div *ngIf="!element.isEdit">
+            <div class="btn-edit" *ngIf="col ==='edit' ; spanHeader">
+              <button mat-icon-button (click)="element.isEdit = !element.isEdit"><mat-icon>edit</mat-icon></button>
+            </div>
+            <div class="btn-delete" *ngIf="col ==='delete' ; spanHeader">
+              <button mat-icon-button (click)="element.isEdit = !element.isEdit"><mat-icon>delete</mat-icon></button>
+            </div>
+            <span #spanHeader>
+              {{element[col]}}
+            </span>
+          </div>
+          <div *ngIf="element.isEdit && (col !== 'delete')">
+            <div class="btn-edit" *ngIf="col === 'edit'; else dataField">
+              <button mat-icon-button (click)="element.isEdit = !element.isEdit; onVendorSubmit(element);"><mat-icon>done</mat-icon></button>
+            </div>
+            <ng-template #dataField>
+              <mat-form-field>
+                <mat-label>{{col}}</mat-label>
+                <input [type]="'text'" matInput [(ngModel)]="element[col]">
+              </mat-form-field>
+            </ng-template>
+          </div>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+
+    <mat-paginator [pageSizeOptions]="[5, 10, 20]"
+                   showFirstLastButtons
+                   aria-label="Select page of periodic elements"
+                   class="mat-elevation-z8 data-table">
+    </mat-paginator>
+  </div>
+</div>

@@ -1,0 +1,41 @@
+<div mat-dialog-title>
+  <p class="mat-h3">添加参与员工</p>
+</div>
+
+<div mat-dialog-content>
+  <form [formGroup]="batchGroup">
+    <mat-form-field appearance="outline">
+      <mat-label>生产产品</mat-label>
+      <input matInput formControlName="product_id" [matAutocomplete]="auto">
+      <mat-autocomplete #auto="matAutocomplete" [displayWith]="productDisplayFn">
+        <mat-option *ngFor="let p of this.productOptions | async" [value]="p">
+          {{p.name}} | {{p.id}}
+        </mat-option>
+      </mat-autocomplete>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>计划生产数量</mat-label>
+      <input matInput type="number" formControlName="plan_amount">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>开工日期</mat-label>
+      <input matInput [matDatepicker]="picker" formControlName="start">
+      <mat-datepicker-toggle matSuffix [for]="picker">
+      </mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>备注</mat-label>
+      <textarea matInput formControlName="notice"></textarea>
+    </mat-form-field>
+  </form>
+</div>
+
+
+<div mat-dialog-actions>
+  <button mat-raised-button color="primary" (click)="onBatchSubmit(batchGroup)">确认提交</button>
+  <button mat-button (click)="onNoClick()">结束</button>
+</div>

@@ -1,0 +1,13 @@
+mat-card {
+  width: 45%;
+}
+
+mat-form-field {
+  width: 90%;
+}
+
+.clearfix::after {
+  content: "";
+  clear: both;
+  display: table;
+}

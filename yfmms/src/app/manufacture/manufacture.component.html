@@ -1,0 +1,134 @@
+<div class="body-container" fxLayout="column" fxLayoutAlign="space-between center">
+  <div class="button-container">
+    <button mat-button class="call" (click)="openCreateBatchDialog()"> 创建新生产批次 </button>
+    <button mat-button class="call" routerLink="/history"> 历史生产批次 </button>
+  </div>
+
+  <div fxLayout="row" fxLayoutAlign="space-between start" class="fullfill">
+    <mat-card fxFlex="40">
+      <mat-card-header>
+        <mat-card-title> 生产批次列表 </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <mat-selection-list #unfinished [multiple]="false" (selectionChange)="onBatchChange(unfinished.selectedOptions.selected)">
+          <mat-list-option *ngFor="let batch of displayedBatches" [value]="batch">
+            {{batch.product_name}} | {{batch.plan_amount}}件 | 排产：{{batch.start | date:"YYYY/MM/dd" }}
+          </mat-list-option>
+        </mat-selection-list>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card *ngIf="selectedBatch && selectedBatch.id" fxFlex="60">
+      <mat-card-header>
+        <p class="mat-title highlight">批次：{{selectedBatch.id}}</p>
+      </mat-card-header>
+      <mat-card-content>
+        <mat-accordion class="example-headers-align">
+          <mat-expansion-panel
+            [expanded]="step === (bp.process?.process_order || 1)"
+            (opened)="setStep(bp.process?.process_order || 1);updateSpecChoiceGroup(bp)"
+            hideToggle
+            *ngFor="let bp of sortedBatchProcesses(selectedBatch.batch_process)">
+            <mat-expansion-panel-header *ngIf="bp.process">
+              <mat-panel-title>
+                工艺{{bp.process.process_order}} - {{bp.process.process_name}}
+              </mat-panel-title>
+              <mat-panel-description>
+                状态：{{bp.status}}
+              </mat-panel-description>
+            </mat-expansion-panel-header>
+
+            <div class="meta-info" *ngIf="bp.process && bp.process.process_order === step">
+              <p class="info"> 预计数量：{{bp.start_amount || '尚未开始'}} | 完成数量：{{bp.end_amount || '尚未完成'}}</p>
+              <p class="subtitle"> 采用配件： </p>
+              <div class="greyborder distance">
+                <p *ngIf="!bp.process.process_component || bp.process.process_component.length === 0"> 无需配件 </p>
+                <div *ngFor="let pc of bp.process.process_component">
+                  <form [formGroup]="specChoiceGroup"
+                      class="flex-container">
+                    <div *ngIf="pc.component" fxLayout="row" fxLayoutAlign="space-between center" class="fullfill">
+                      <p> {{pc.component.name}} * {{pc.consumption}} </p>
+                      <mat-form-field>
+                        <mat-label> 选择具体使用规格 </mat-label>
+                        <mat-select [formControlName]="pc.component.id || ''">
+                          <mat-option *ngFor="let spec of pc.component.specification" [value]="spec">
+                            {{spec.id}} | {{spec.vendor?.company}}
+                          </mat-option>
+                        </mat-select>
+                      </mat-form-field>
+                    </div>
+                  </form>
+                </div>
+                <button mat-button class="call"
+                        *ngIf="bp.process.process_component && bp.process.process_component.length > 0 && !(bp.warehouse_record && bp.warehouse_record.length > 0)"
+                        [disabled]="specChoiceGroup.invalid"
+                        (click)="onConfirmSpecs(bp)">确认领料规格</button>
+                <button mat-button class="action"
+                        *ngIf="bp.process.process_component && bp.process.process_component.length > 0 && !!(bp.warehouse_record && bp.warehouse_record.length > 0) && (specChoiceGroup.status === 'DISABLED')"
+                        (click)="specChoiceGroup.enable()">修改领料规格</button>
+                <button mat-button class="call"
+                        *ngIf="!!(bp.warehouse_record && bp.warehouse_record.length > 0) && !(specChoiceGroup.status === 'DISABLED')"
+                        [disabled]="specChoiceGroup.invalid"
+                        (click)="onEditSpecs(bp)">确认修改</button>
+              </div>
+            </div>
+
+            <mat-divider [inset]="true"></mat-divider>
+            <div class="work-info">
+              <p class="subtitle"> 领料记录： </p>
+              <div class="greyborder distance work" *ngIf="!bp.work || bp.work.length === 0"> <p>无领料记录</p> </div>
+              <div *ngIf="!!bp.work">
+                <div *ngFor="let work of bp.work" class="greyborder distance work">
+                  <p> {{work.employee_name}} ({{work.employee_id}}) | {{work.work_date | date:"YYYY/MM/dd"}}</p>
+                  <p *ngFor="let ws of work.work_specification">
+                    {{ws.specification_id}} 实领 {{ws.actual_amount}} (应领：{{ws.plan_amount}})
+                  </p>
+                  <div class="flex-container">
+                    <button mat-raised-button color="accent"
+                            [disabled]="!bp.warehouse_record"
+                            (click)="openEditWorkDialog(work, bp.warehouse_record || [], bp.start_amount || 0);rerenderBatch(selectedBatch.id)" *ngIf="!work.complete_unit">
+                      编辑该工人领料</button>
+                    <button mat-raised-button color="primary"
+                            (click)="openCompleteWorkDialog(work)"
+                            *ngIf="!work.complete_unit">
+                      标记完成</button>
+                    <button mat-button color="primary" *ngIf="!!work.complete_unit" disabled>已完成</button>
+                  </div>
+                </div>
+              </div>
+              <div class="flex-container">
+                <button mat-raised-button
+                        color="accent"
+                        (click)="openCreateWorkDialog(bp)"
+                        [disabled]="!(!bp.process?.process_component || !!bp.warehouse_record)">添加参与工人</button>
+                <button mat-raised-button
+                        color="primary"
+                        (click)="completeBatchProcess(bp)"
+                        [disabled]="!checkAllWorkDone(bp.work || [])"
+                        *ngIf="bp.status === 'ongoing'">确认工艺完成</button>
+                <button mat-raised-button
+                        color="primary"
+                        *ngIf="bp.status === 'finished'" disabled>工艺已完成</button>
+                <button mat-raised-button
+                        color="primary"
+                        (click)="startBatchProcess(bp, selectedBatch);rerenderBatch(selectedBatch.id)"
+                        *ngIf="bp.status === 'unstarted'">开始该工艺</button>
+              </div>
+            </div>
+
+            <mat-action-row *ngIf="selectedBatch.batch_process">
+              <button mat-button color="warn" (click)="prevStep()" *ngIf="step > 1">前一步</button>
+              <button mat-button color="primary" (click)="nextStep()" *ngIf="step <= selectedBatch.batch_process.length">后一步</button>
+            </mat-action-row>
+          </mat-expansion-panel>
+        </mat-accordion>
+
+        <div class="button-container" fxLayout="row" fxLayoutAlign="end center">
+          <button mat-raised-button [disabled]="checkAllBatchProcessDone(selectedBatch.batch_process)" (click)="completeBatch(selectedBatch)">确认批次完工</button>
+        </div>
+
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+</div>

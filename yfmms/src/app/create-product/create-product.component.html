@@ -1,0 +1,149 @@
+<div>
+  <div class="sub-header">
+    <p class="mat-title">创建产品</p>
+  </div>
+  <div  class="body-container" fxLayout="row" fxLayoutAlign="space-around start">
+    <mat-card class="new-product">
+      <mat-card-header>
+        <mat-card-title> 新产品 </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <form fxLayout="column" fxLayoutAlign="space-around center" [formGroup]="productGroup" (ngSubmit)="onProductSubmit(productGroup)">
+          <mat-form-field appearance="outline">
+            <mat-label>产品序列号</mat-label>
+            <input matInput formControlName="id">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>产品名称</mat-label>
+            <input matInput formControlName="name">
+            <mat-hint align="end">可以与其他产品重复</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>分类</mat-label>
+            <input matInput formControlName="category">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>产品描述</mat-label>
+            <textarea matInput formControlName="description"></textarea>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>初始库存</mat-label>
+            <input matInput type="number" formControlName="inventory">
+            <mat-hint align="end">默认值为零</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>备注</mat-label>
+            <textarea matInput formControlName="notice"></textarea>
+          </mat-form-field>
+
+          <div class="button-container">
+            <button mat-raised-button color="accent" type="submit" [disabled]="!productGroup.valid">确认/更新产品信息</button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="process">
+      <mat-card-header>
+        <mat-card-title> 产品工艺 </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <form fxLayout="column" fxLayoutAlign="space-around center" [formGroup]="processGroup" (ngSubmit)="onProcessSubmit(processGroup)">
+          <mat-form-field appearance="outline">
+            <mat-label>工艺名称</mat-label>
+            <input matInput formControlName="process_name">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>工艺顺序</mat-label>
+            <input type="number" matInput formControlName="process_order">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>备注</mat-label>
+            <textarea matInput formControlName="notice"></textarea>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>所需配件</mat-label>
+            <mat-chip-list #chipList aria-label="Fruit selection">
+              <mat-chip
+                *ngFor="let compo of composOfProcess"
+                [selectable]="selectable"
+                [removable]="removable"
+                (removed)="remove(compo)">
+                {{compo.name}} | {{compo.id}}
+                <mat-icon matChipRemove *ngIf="removable">cancel</mat-icon>
+              </mat-chip>
+              <input
+                matInput
+                placeholder="所需配件..."
+                #compoInput
+                [formControl]="selectedCompo"
+                [matAutocomplete]="auto"
+                [matChipInputFor]="chipList"
+                [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                (matChipInputTokenEnd)="add($event)">
+            </mat-chip-list>
+            <mat-autocomplete #auto="matAutocomplete" [displayWith]="compoDisplayFn" (optionSelected)="selected($event)">
+              <mat-option *ngFor="let compo of this.compoOptions | async" [value]="compo">
+                {{compo.name}} | {{compo.id}}
+              </mat-option>
+            </mat-autocomplete>
+          </mat-form-field>
+
+          <div class="button-container">
+            <button mat-raised-button color="primary" type="submit" [disabled]="!productGroup.valid">确认添加该工艺</button>
+          </div>
+          </form>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="submit-info">
+      <mat-card-header>
+        <mat-card-title> 提交信息预览</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div *ngIf="this.newProduct" fxLayout="column" fxLayoutAlign="space-around center">
+          <div fxLayout="column" fxLayoutAlign="start start" >
+            <p class="info"> 产品序列号： {{this.newProduct.id}}</p>
+            <p class="info"> 产品名称：{{this.newProduct.name}} </p>
+            <p class="info"> 产品分类：{{this.newProduct.category}} </p>
+            <p class="info"> 工艺：</p>
+          </div>
+          <mat-accordion class="process-list-display">
+            <mat-expansion-panel hideToggle *ngFor="let process of processOfProduct">
+              <mat-expansion-panel-header>
+                <mat-panel-title>
+                  {{process.process_name}}
+                </mat-panel-title>
+                <mat-panel-description>
+                  顺序：{{process.process_order}}
+                </mat-panel-description>
+              </mat-expansion-panel-header>
+              <div fxLayout="column" fxLayoutAlign="start start">
+                <mat-chip-list aria-label="Fish selection">
+                  <mat-chip color="accent" *ngFor="let pc of process.process_component">{{pc.component_name}} | {{pc.component_id}}</mat-chip>
+                </mat-chip-list>
+                <button mat-icon-button (click)="removeProcess(process)">
+                  删除该工艺
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </mat-expansion-panel>
+          </mat-accordion>
+          <div class="button-container">
+            <button mat-raised-button class="action" (click)="onFinalSubmit()" [disabled]="!productGroup.valid">确认提交新产品</button>
+          </div>
+        </div>
+      </mat-card-content>
+
+    </mat-card>
+
+  </div>
+</div>
