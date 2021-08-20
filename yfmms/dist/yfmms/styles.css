@@ -107,11 +107,14 @@ p.highlight, b.highlight {
   color: var(--logoblue);
   line-height: 2rem;
 }
+p.subtitle {
+  font-weight: bold;
+}
 p.whiteout {
   color: whitesmoke;
 }
 p.info, b.info {
-  color: var(--infoyellow);
+  color: darkorange;
 }
 p.warn, b.warn {
   color: var(--warnred);
@@ -171,6 +174,20 @@ button.option:hover {
 }
 .flex-container {
   display: flex;
+  text-align: center;
+}
+.greybg {
+  background-color: lightgrey;
+}
+.greyborder {
+  border: 1px solid lightgrey;
+}
+div.distance {
+  padding: 2%;
+}
+div.justify {
+  display: flex;
+  text-align: justify;
 }
 
 /*# sourceMappingURL=styles.css.map*/
