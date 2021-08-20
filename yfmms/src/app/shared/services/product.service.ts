@@ -46,6 +46,10 @@ export class ProductService {
     return this.http.put<Product>(`${environment.API_URL}/products`, product)
   }
 
+  adjustProductInventory(product_id: number, adjust: number): Observable<Product> {
+    return this.http.put<Product>(`${environment.API_URL}/products/adjust_inventory/${product_id}/${adjust}`, null)
+  }
+
   deleteProduct(product_id: number): Observable<PostResponse> {
     return this.http.delete<PostResponse>(`${environment.API_URL}/products/${product_id}`)
   }
