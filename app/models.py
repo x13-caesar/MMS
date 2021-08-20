@@ -88,6 +88,7 @@ class Process(Base):
     process_name = Column(String)
     process_order = Column(Integer)
     notice = Column(String)
+    process_component = relationship("ProcessComponent", backref="process")
 
 
 Product.process = relationship("Process",
@@ -103,15 +104,7 @@ class ProcessComponent(Base):
     component_id = Column(String, ForeignKey('component.id'))
     attrition_rate = Column(Float)
     consumption = Column(Integer)
-
-
-Process.process_component = relationship("ProcessComponent",
-                                         order_by=ProcessComponent.id,
-                                         backref="process")
-
-Component.process_component = relationship("ProcessComponent",
-                                           order_by=ProcessComponent.id,
-                                           backref="component")
+    component = relationship('Component', backref="process_component")
 
 
 class Batch(Base):
@@ -139,16 +132,16 @@ class BatchProcess(Base):
     start_amount = Column(Integer)
     end_amount = Column(Integer)
     warehouse_record = relationship("WarehouseRecord", backref="batch_process")
-    # process = relationship("Process", back_populates="batch_process")
+    process = relationship("Process", backref="batch_process")
 
 
 Batch.batch_process = relationship("BatchProcess",
                                    order_by=BatchProcess.id,
                                    backref="batch")
 
-Process.batch_process = relationship("BatchProcess",
-                                     order_by=BatchProcess.id,
-                                     backref="process")
+# Process.batch_process = relationship("BatchProcess",
+#                                      order_by=BatchProcess.id,
+#                                      backref="process")
 
 class Delivery(Base):
     __tablename__ = 'delivery'
@@ -220,11 +213,12 @@ class Work(Base):
     batch_process_id = Column(Integer, ForeignKey('batch_process.id'))
     employee_id = Column(Integer, ForeignKey('employee.id'))
     employee_name = Column(String, ForeignKey('employee.name'))
-    work_date = Column(DateTime)
+    work_date = Column(Date)
     unit_pay = Column(Float)
     complete_unit = Column(Integer)
     hour_pay = Column(Float)
     complete_hour = Column(Integer)
+    plan_unit = Column(Integer)
     # warehouse_record = relationship("WarehouseRecord",
     #                                 primaryjoin="Work.batch_process_id == foreign(WarehouseRecord.batch_process_id)")
 
@@ -248,6 +242,7 @@ class WorkSpecification(Base):
 Work.work_specification = relationship("WorkSpecification",
                                        order_by=WorkSpecification.id,
                                        backref="work")
+
 Specification.work_specification = relationship("WorkSpecification",
                                                order_by=WorkSpecification.id,
                                                back_populates="specification")

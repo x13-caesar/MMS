@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from typing import List
 from .. import schemas
-from ..services import batch_service
+from ..services import batch_service, process_service
 from sqlalchemy.orm import Session
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
@@ -44,6 +44,13 @@ def read_unfinished_batches(db: Session = Depends(get_db)):
     ongoing_batches = batch_service.get_batches_by_status('ongoing', db=db)
     unstarted_batches = batch_service.get_batches_by_status('unstarted', db=db)
     return ongoing_batches + unstarted_batches
+
+
+@router.get("/collected", response_model=List[schemas.Batch])
+def read_collected_batches(db: Session = Depends(get_db)):
+    finished_batches = batch_service.get_batches_by_status('finished', db=db)
+    shipped_batches = batch_service.get_batches_by_status('shipped', db=db)
+    return finished_batches + shipped_batches
 
 
 @router.get("/{batch_id}", response_model=schemas.Batch)
@@ -133,7 +140,8 @@ def read_batch_start_before(date: datetime, db: Session = Depends(get_db)):
 
 @router.post("/", response_model=schemas.Batch)
 def create_batch(batch: schemas.BatchCreate, db: Session = Depends(get_db)):
-    new_batch =  batch_service.create_batch(batch=batch, db=db)
+    new_batch = batch_service.create_batch(batch=batch, db=db)
+    return new_batch
 
 
 @router.put("/")

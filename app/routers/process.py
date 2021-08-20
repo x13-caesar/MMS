@@ -30,7 +30,7 @@ def read_process(process_id: int, db: Session = Depends(get_db)):
     return process
 
 
-@router.get("/product_id/{product_id}")
+@router.get("/product_id/{product_id}", response_model=List[schemas.Process])
 def read_processes_by_product_id(product_id: int, db: Session = Depends(get_db)):
     processes = process_service.get_processes_by_product_id(product_id=product_id, db=db)
     if not processes:

@@ -35,12 +35,13 @@ def create_component(component: schemas.ComponentCreate, db: Session):
     db.add(new_component)
     db.commit()
     db.refresh(new_component)
-    new_id = new_component.id
-    return {"success": True, "detail": new_id}
+    return new_component
 
 
 def update_component(component: schemas.Component, db: Session):
-    updated_component = models.Component(**component.dict())
+    json_compo = jsonable_encoder(component)
+    json_compo.pop('specification')
+    updated_component = models.Component(**json_compo)
     db.query(models.Component). \
         filter(models.Component.id == updated_component.id). \
         update(jsonable_encoder(updated_component))

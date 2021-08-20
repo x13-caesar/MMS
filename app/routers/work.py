@@ -73,7 +73,7 @@ def create_work(work: schemas.WorkCreate, db: Session = Depends(get_db)):
     return work_service.create_work(work=work, db=db)
 
 
-@router.put("/")
+@router.put("/", response_model=schemas.Work)
 def update_work(work: schemas.Work,
                 db: Session = Depends(get_db)):
     db_work_data = work_service.get_work(work.id, db=db)

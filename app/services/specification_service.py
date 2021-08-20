@@ -4,7 +4,7 @@ from fastapi.encoders import jsonable_encoder
 from .. import models, schemas
 
 
-def get_specification(specification_id: int, db: Session):
+def get_specification(specification_id: str, db: Session):
     return db.query(models.Specification).filter(models.Specification.id == specification_id).first()
 
 
@@ -56,11 +56,12 @@ def create_specification(specification: schemas.SpecificationCreate, db: Session
     db.add(new_specification)
     db.commit()
     db.refresh(new_specification)
-    return {"success": True, "detail": new_specification.id}
+    return new_specification
 
 
 def update_specification(specification: schemas.Specification, db: Session):
-    updated_specification = models.Specification(**specification.dict())
+    updated_specification = models.Specification(**jsonable_encoder(specification))
+    print(updated_specification)
     db.query(models.Specification). \
         filter(models.Specification.id == updated_specification.id). \
         update(jsonable_encoder(updated_specification))

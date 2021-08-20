@@ -3,7 +3,7 @@ import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
 
 from .routers import vendor, specification, component, batch, batch_process, buyer, delivery, employee, operation, \
-    process, process_component, product, salary, work, work_specification, user
+    process, process_component, product, salary, work, work_specification, warehouse_record, user
 from .security import token
 
 app = FastAPI(
@@ -15,7 +15,7 @@ controllers = [vendor, buyer,
                product,
                specification, component,
                batch, batch_process, delivery,
-               employee, salary, work, work_specification,
+               employee, salary, work, work_specification, warehouse_record,
                process, process_component,
                operation,
                token,
@@ -31,7 +31,8 @@ origins = [
     "https://localhost.tiangolo.com",
     "http://localhost",
     "http://localhost:8080",
-    "http://localhost:4200"
+    "http://localhost:4200",
+    "http://121.40.125.254:80",
 ]
 
 app.add_middleware(
@@ -45,7 +46,7 @@ app.add_middleware(
 @app.get("/")
 async def root():
     return {"author": "x13-caesar"}
-
-
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+#
+#
+# if __name__ == "__main__":
+#     uvicorn.run(app, host="0.0.0.0", port=8000)

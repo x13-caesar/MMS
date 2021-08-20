@@ -7,10 +7,10 @@ export interface Batch {
   product_name?: string,
   plan_amount: number,
   actual_amount?: number,
-  create: string,
-  start: string,
-  end?: string,
-  ship?: string,
+  create: Date,
+  start: Date,
+  end?: Date | string,
+  ship?: Date,
   notice?: string,
   status: string
   batch_process: BatchProcess[]

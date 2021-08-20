@@ -12,7 +12,7 @@ from ..dependencies import get_db
 
 router = APIRouter(
     prefix="/products",
-    tags=["product"],
+    tags=["products"],
     responses={404: {"description": "Not found"}},
 )
 
@@ -23,7 +23,7 @@ def read_products(db: Session = Depends(get_db)):
     return products
 
 
-@router.get("/only_name", response_model=List[schemas.Product])
+@router.get("/only_name")
 def read_products_names(db: Session = Depends(get_db)):
     products = product_service.get_products_names(db=db)
     return products
@@ -107,6 +107,16 @@ def update_product(product: schemas.Product,
     update_data = product.dict(exclude_unset=True)
     updated_product = db_product_model.copy(update=update_data)
     return product_service.update_product(product=updated_product, db=db)
+
+
+@router.put("/adjust_inventory/{product_id}/{adjust_number}")
+def adjust_inventory(product_id: int, adjust_number: int,
+                     db: Session = Depends(get_db)):
+    db_product_data = product_service.get_product(product_id, db=db)
+    if not db_product_data:
+        raise HTTPException(status_code=400, detail="Matching product not found")
+    db_product_data.inventory += adjust_number
+    return product_service.update_product(product=db_product_data, db=db)
 
 
 @router.delete("/{product_id}")

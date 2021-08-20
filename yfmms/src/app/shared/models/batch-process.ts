@@ -7,9 +7,9 @@ export interface BatchProcess {
   status: string,
   process_id: number,
   batch_id: number,
-  start_amount: number,
-  end_amount: number
+  start_amount?: number,
+  end_amount?: number
   work?: Work[],
-  process: Process,
-  warehouse_record: WarehouseRecord[]
+  process?: Process,
+  warehouse_record?: WarehouseRecord[]
 }

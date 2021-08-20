@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Body
 from typing import List
 from .. import schemas
 from ..services import specification_service
@@ -11,7 +11,7 @@ from ..dependencies import get_db
 
 router = APIRouter(
     prefix="/specifications",
-    tags=["specification"],
+    tags=["specifications"],
     responses={404: {"description": "Not found"}},
 )
 
@@ -23,7 +23,7 @@ def read_specifications(db: Session = Depends(get_db)):
 
 
 @router.get("/{specification_id}", response_model=schemas.Specification)
-def read_specification(specification_id: int, db: Session = Depends(get_db)):
+def read_specification(specification_id: str, db: Session = Depends(get_db)):
     specification = specification_service.get_specification(specification_id=specification_id, db=db)
     if specification is None:
         raise HTTPException(status_code=404, detail="Specification not found")
@@ -40,7 +40,7 @@ def read_specification_by_component_id(component_id: str, db: Session = Depends(
 
 @router.get("/vendor_id/{vendor_id}")
 def read_specification_by_vendor_id(vendor_id: int, db: Session = Depends(get_db)):
-    specification = specification_service.get_specification_by_vendor_id(vendor_id=vendor_id, db=db)
+    specification = specification_service.get_specifications_by_vendor_id(vendor_id=vendor_id, db=db)
     if specification is None:
         raise HTTPException(status_code=404, detail="Specification not found")
     return specification
@@ -73,7 +73,7 @@ def read_specification_under_price(price: int, gross: bool, db: Session = Depend
 @router.post("/")
 def create_specification(specification: schemas.SpecificationCreate, db: Session = Depends(get_db)):
     if specification_service.get_specification(specification_id=specification.id,
-                                                db=db):
+                                               db=db):
         raise HTTPException(status_code=400, detail="Existing ID")
     elif specification_service.get_specifications_by_component_id_and_vendor_id(
             component_id=specification.component_id,
@@ -83,8 +83,16 @@ def create_specification(specification: schemas.SpecificationCreate, db: Session
     return specification_service.create_specification(specification=specification, db=db)
 
 
+@router.put("/adjust_stock/{spec_id}/{adjust_number}")
+def adjust_stock(spec_id: str, adjust_number: int, db: Session = Depends(get_db)):
+    db_spec = specification_service.get_specification(specification_id=spec_id, db=db)
+    db_spec.stock += adjust_number
+    return specification_service.update_specification(specification=db_spec,
+                                                      db=db)
+
+
 @router.put("/{specification_id}")
-def update_specification(specification_id: int, specification: schemas.SpecificationCreate,
+def update_specification(specification_id: str, specification: schemas.SpecificationCreate,
                          db: Session = Depends(get_db)):
     db_specification_data = specification_service.get_specification(specification_id, db=db)
     if not db_specification_data:
@@ -96,7 +104,7 @@ def update_specification(specification_id: int, specification: schemas.Specifica
 
 
 @router.delete("/{specification_id}")
-def delete_specification(specification_id: int, db: Session = Depends(get_db)):
+def delete_specification(specification_id: str, db: Session = Depends(get_db)):
     db_specification_data = specification_service.get_specification(specification_id, db=db)
     if not db_specification_data:
         raise HTTPException(status_code=400, detail="Matching specification not found")

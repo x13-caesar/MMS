@@ -68,9 +68,9 @@ def create_component(component: schemas.ComponentCreate, db: Session = Depends(g
     return component_service.create_component(component=component, db=db)
 
 
-@router.put("/{component_id}")
-def update_component(component_id: int, component: schemas.ComponentCreate, db: Session = Depends(get_db)):
-    db_component_data = component_service.get_component(component_id, db=db)
+@router.put("/")
+def update_component(component: schemas.Component, db: Session = Depends(get_db)):
+    db_component_data = component_service.get_component(component.id, db=db)
     if not db_component_data:
         raise HTTPException(status_code=400, detail="Matching component not found")
     db_component_model = schemas.Component(**jsonable_encoder(db_component_data))

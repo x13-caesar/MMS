@@ -5,7 +5,7 @@ export interface Work {
   batch_process_id: number,
   employee_id: number,
   employee_name: string,
-  work_date: Date,
+  work_date: string,
   plan_unit: number,
   unit_pay?: number,
   complete_unit?: number,

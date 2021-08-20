@@ -63,7 +63,7 @@ class Specification(SpecificationBase):
 
 class Component(ComponentBase):
     id: str
-    specification: List[Specification]
+    specification: Optional[List[Specification]]
 
     class Config:
         orm_mode = True
@@ -194,6 +194,7 @@ class WorkBase(BaseModel):
     complete_unit: Optional[int]
     hour_pay: Optional[float]
     complete_hour: Optional[int]
+    plan_unit: int
 
 
 class WorkCreate(WorkBase):
@@ -223,7 +224,7 @@ class BatchProcessCreate(BatchProcessBase):
 class BatchProcess(BatchProcessBase):
     id: int
     work: Optional[List[Work]]
-    process: Process
+    process: Optional[Process]
     warehouse_record: Optional[List[WarehouseRecord]]
 
     class Config:
@@ -311,7 +312,6 @@ class EmployeeCreate(EmployeeBase):
 
 
 class Employee(EmployeeBase):
-    employee_name: Optional[str]
     id: int
 
     class Config:
