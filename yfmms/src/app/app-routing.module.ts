@@ -15,6 +15,8 @@ import {TransmissionComponent} from './transmission/transmission.component';
 import {VendorListComponent} from './vendor-list/vendor-list.component';
 import {HistoryComponent} from './manufacture/history/history.component';
 import {EmployeeComponent} from './employee/employee.component';
+import {DeliveryComponent} from './delivery/delivery.component';
+import {BuyerListComponent} from './buyer-list/buyer-list.component';
 
 const routes: Routes = [
   {
@@ -34,10 +36,8 @@ const routes: Routes = [
     path: 'stock',
     component: StockComponent
   },
-  {
-    path: 'manufacture',
-    component: ManufactureComponent
-  },
+  { path: 'manufacture', component: ManufactureComponent },
+  { path: 'manufacture/:batch_id', component: ManufactureComponent},
   {
     path: 'history',
     component: HistoryComponent
@@ -45,6 +45,14 @@ const routes: Routes = [
   {
     path: 'employee',
     component: EmployeeComponent
+  },
+  {
+    path: 'delivery',
+    component: DeliveryComponent
+  },
+  {
+    path: 'buyer',
+    component: BuyerListComponent
   },
   {
     path: 'hr',
@@ -70,10 +78,7 @@ const routes: Routes = [
     path: 'create-spec',
     component: CreateSpecComponent
   },
-  {
-    path: 'transmission/:error',
-    component: TransmissionComponent
-  }
+  {path: 'transmission/:error', component: TransmissionComponent}
 ];
 
 @NgModule({

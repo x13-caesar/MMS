@@ -55,9 +55,9 @@ def create_buyer(buyer: schemas.BuyerCreate, db: Session = Depends(get_db)):
     return buyer_service.create_buyer(buyer=buyer, db=db)
 
 
-@router.put("/{buyer_id}")
-def update_buyer(buyer_id: int, buyer: schemas.BuyerCreate, db: Session = Depends(get_db)):
-    db_buyer_data = buyer_service.get_buyer(buyer_id, db=db)
+@router.put("/")
+def update_buyer(buyer: schemas.Buyer, db: Session = Depends(get_db)):
+    db_buyer_data = buyer_service.get_buyer(buyer.id, db=db)
     if not db_buyer_data:
         raise HTTPException(status_code=400, detail="Matching buyer not found")
     db_buyer_model = schemas.Buyer(**jsonable_encoder(db_buyer_data))

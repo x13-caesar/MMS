@@ -22,6 +22,7 @@ import {WarehouseRecordService} from '../shared/services/warehouse-record.servic
 import {CompoService} from '../shared/services/compo.service';
 import {UtilService} from '../shared/util.service';
 import {SpecService} from '../shared/services/spec.service';
+import {ActivatedRoute} from '@angular/router';
 
 @Component({
   selector: 'app-manufacture',
@@ -30,7 +31,8 @@ import {SpecService} from '../shared/services/spec.service';
 })
 export class ManufactureComponent implements OnInit {
 
-  displayedBatches: Batch[] = []
+  displayId!: string;
+  displayedBatches: Batch[] = [];
   selectedBatch!: Batch;
   selectedBatchProcess!: BatchProcess;
 
@@ -45,6 +47,7 @@ export class ManufactureComponent implements OnInit {
     private employeeService: EmployeeService,
     private productService: ProductService,
     public dialog: MatDialog,
+    private route: ActivatedRoute,
     private workService: WorkService,
     private _snackBar: MatSnackBar,
     private specService: SpecService,
@@ -55,6 +58,8 @@ export class ManufactureComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    this.displayId = String(this.route.snapshot.paramMap.get('batch_id'));
+    console.log(this.displayId)
     this.batchService.getUnfinishedBatches().subscribe(
       res => {
         this.displayedBatches = res;
@@ -63,7 +68,10 @@ export class ManufactureComponent implements OnInit {
             res => b.product_name = res.name,
             error => console.log(error)
           );
-        })
+          if (String(b.id) === String(this.displayId)) {
+            this.selectedBatch = b;
+          }
+        });
       },
       error => console.log(error)
     );

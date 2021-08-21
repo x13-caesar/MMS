@@ -37,6 +37,10 @@ import { EditComponentDialogComponent } from './stock/edit-component-dialog/edit
 import { DeleteComponentDialogComponent } from './stock/delete-component-dialog/delete-component-dialog.component';
 import { EditSpecDialogComponent } from './stock/edit-spec-dialog/edit-spec-dialog.component';
 import { CreateEmployeeDialogComponent } from './employee/create-employee-dialog/create-employee-dialog.component';
+import { DeliveryComponent } from './delivery/delivery.component';
+import { CreateDeliveryDialogComponent } from './delivery/create-delivery-dialog/create-delivery-dialog.component';
+import { BuyerListComponent } from './buyer-list/buyer-list.component';
+import { CreateBuyerDialogComponent } from './buyer-list/create-buyer-dialog/create-buyer-dialog.component';
 
 @NgModule({
   declarations: [
@@ -69,7 +73,11 @@ import { CreateEmployeeDialogComponent } from './employee/create-employee-dialog
     EditComponentDialogComponent,
     DeleteComponentDialogComponent,
     EditSpecDialogComponent,
-    CreateEmployeeDialogComponent
+    CreateEmployeeDialogComponent,
+    DeliveryComponent,
+    CreateDeliveryDialogComponent,
+    BuyerListComponent,
+    CreateBuyerDialogComponent
   ],
     imports: [
       HttpClientModule,

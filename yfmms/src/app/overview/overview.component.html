@@ -1,13 +1,9 @@
 <div>
   <div class="body-container" fxLayout="row" fxLayoutAlign="space-between center">
     <div class="row-container" fxLayout="row" fxLayoutAlign="space-around center">
-      <button mat-button class="call" [routerLink]="['/create-batch']"> 创建生产批次 </button>
-      <button mat-button class="call" > 交付产品 </button>
-      <button mat-button class="action" [routerLink]="'/create-product'"> 创建新产品 </button>
-      <button mat-button class="action"> 更新工资 </button>
     </div>
   </div>
-  <div class="body-container" fxLayout="row" fxLayoutAlign="space-between center">
+  <div class="body-container" fxLayout="row" fxLayoutAlign="space-between start">
     <div class="row-container" fxLayout="column" fxLayoutAlign="start">
       <mat-card class="column">
         <mat-card-title>
@@ -17,15 +13,15 @@
           <p class="info mat-title" *ngIf="!ongoing_batches && !plan_batches"> 没有未完成的生产批次 </p>
           <mat-list>
             <div mat-subheader>生产中</div>
-            <mat-list-item *ngFor="let batch of ongoing_batches">
-              <mat-icon mat-list-icon>folder</mat-icon>
+            <mat-list-item class="clickable" *ngFor="let batch of ongoing_batches" [routerLink]="['/manufacture', batch.id]">
+              <mat-icon mat-list-icon>pending</mat-icon>
               <div mat-line>{{batch.product_name}} * {{batch.plan_amount}}</div>
               <div mat-line> {{batch.start | date}} </div>
             </mat-list-item>
-            <mat-divider></mat-divider>
+            <mat-divider [inset]="true"></mat-divider>
             <div mat-subheader>未开始</div>
-            <mat-list-item *ngFor="let batch of plan_batches">
-              <mat-icon mat-list-icon>note</mat-icon>
+            <mat-list-item class="clickable" *ngFor="let batch of plan_batches" [routerLink]="['/manufacture', batch.id]">
+              <mat-icon mat-list-icon>update</mat-icon>
               <div mat-line>{{batch.product_name}} * {{batch.plan_amount}}</div>
               <div mat-line> {{batch.start | date}} </div>
             </mat-list-item>
@@ -34,21 +30,25 @@
 
       </mat-card>
     </div>
-    <div class="row-container" fxLayout="column" fxLayoutAlign="start">
+    <div class="row-container" fxLayout="column" fxLayoutAlign="start none">
       <mat-card class="column">
         <mat-card-title> 库存预警 </mat-card-title>
+        <br>
         <mat-card-content>
-          <h5>Starting from 04/01</h5>
-          <p> Total Earning: $<b>420.00</b></p>
-          <p> Avg Review Score: <b>4.8/5.0</b></p>
+          <ul>
+            <li *ngFor="let compo of displayCompos">
+              <p class="mat-h3 info">
+                {{compo.name}}({{compo.id}}) | 现有 {{getTotalStock(compo)}} | 警戒线 {{compo.warn_stock}}
+              </p>
+            </li>
+          </ul>
+
         </mat-card-content>
       </mat-card>
       <mat-card class="column">
         <mat-card-title> 近期操作 </mat-card-title>
+        <br>
         <mat-card-content>
-          <h5>Starting from 04/01</h5>
-          <p> Total Earning: $<b>420.00</b></p>
-          <p> Avg Review Score: <b>4.8/5.0</b></p>
         </mat-card-content>
       </mat-card>
 

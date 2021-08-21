@@ -8,6 +8,7 @@
       <mat-form-field appearance="standard" class="filter">
         <mat-label>材料</mat-label>
         <mat-select formControlName="material">
+          <mat-option>**不限**</mat-option>
           <mat-option *ngFor="let m of materials" [value]="m">
             {{m}}
           </mat-option>
@@ -16,6 +17,7 @@
       <mat-form-field appearance="standard" class="filter">
         <mat-label>种类</mat-label>
         <mat-select formControlName="category">
+          <mat-option>**不限**</mat-option>
           <mat-option *ngFor="let c of categories" [value]="c">
             {{c}}
           </mat-option>
@@ -64,7 +66,7 @@
                   <p class="mat-h3 info">库存：{{spec.stock}}</p>
                 </mat-card-content>
                 <mat-card-actions>
-                  <button mat-stroked-button color="primary" (click)="openEditSpecDialog(spec)">修改</button>
+                  <button mat-stroked-button color="primary" (click)="openEditSpecDialog(spec, element.name)">修改</button>
                   <button mat-stroked-button color="warn">删除</button>
                 </mat-card-actions>
               </mat-card>

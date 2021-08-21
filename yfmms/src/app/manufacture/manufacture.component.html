@@ -1,13 +1,13 @@
 <div class="body-container" fxLayout="column" fxLayoutAlign="space-between center">
-  <div class="button-container">
+  <div class="button-container fullfill">
     <button mat-button class="call" (click)="openCreateBatchDialog()"> 创建新生产批次 </button>
-    <button mat-button class="call" routerLink="/history"> 历史生产批次 </button>
+    <button mat-button class="info" routerLink="/history"> 历史生产批次 </button>
   </div>
 
   <div fxLayout="row" fxLayoutAlign="space-between start" class="fullfill">
     <mat-card fxFlex="40">
       <mat-card-header>
-        <mat-card-title> 生产批次列表 </mat-card-title>
+        <mat-card-title> 未完工批次 </mat-card-title>
       </mat-card-header>
       <mat-card-content>
         <mat-selection-list #unfinished [multiple]="false" (selectionChange)="onBatchChange(unfinished.selectedOptions.selected)">
@@ -73,13 +73,13 @@
               </div>
             </div>
 
-            <mat-divider [inset]="true"></mat-divider>
+            <br>
             <div class="work-info">
               <p class="subtitle"> 领料记录： </p>
               <div class="greyborder distance work" *ngIf="!bp.work || bp.work.length === 0"> <p>无领料记录</p> </div>
               <div *ngIf="!!bp.work">
                 <div *ngFor="let work of bp.work" class="greyborder distance work">
-                  <p> {{work.employee_name}} ({{work.employee_id}}) | {{work.work_date | date:"YYYY/MM/dd"}}</p>
+                  <p class="mat-h4 record"> {{work.employee_name}} ({{work.employee_id}}) | 计划{{work.plan_unit}}件 | 领料于{{work.work_date | date:"YYYY/MM/dd"}}</p>
                   <p *ngFor="let ws of work.work_specification">
                     {{ws.specification_id}} 实领 {{ws.actual_amount}} (应领：{{ws.plan_amount}})
                   </p>

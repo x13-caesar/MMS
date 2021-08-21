@@ -19,6 +19,7 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 import {EditComponentDialogComponent} from './edit-component-dialog/edit-component-dialog.component';
 import {DeleteComponentDialogComponent} from './delete-component-dialog/delete-component-dialog.component';
 import {Spec} from '../shared/models/spec';
+import {EditSpecDialogComponent} from './edit-spec-dialog/edit-spec-dialog.component';
 
 
 @Component({
@@ -43,7 +44,7 @@ export class StockComponent implements OnInit, AfterViewInit {
   dataSource: any;
   expandedElement!: Compo | null;
 
-  filterGroup!: FormGroup
+  filterGroup!: FormGroup;
 
   materials: (string | undefined)[] = [];
   categories: string[] = [];
@@ -142,7 +143,20 @@ export class StockComponent implements OnInit, AfterViewInit {
     });
   }
 
-  openEditSpecDialog(spec: Spec): void {
+  openEditSpecDialog(spec: Spec, compo_name: string): void {
+    const dialogRef = this.dialog.open(EditSpecDialogComponent, {
+      width: environment.LARGE_DIALOG_WIDTH,
+      data: {spec: spec, compo_name: compo_name}
+    });
 
+    dialogRef.afterClosed().subscribe(updated_spec => {
+      if (!!updated_spec) {
+        const idx = this.displayCompos.findIndex(c => c.id === updated_spec.id);
+        this.displayCompos[idx] = {...this.displayCompos[idx], ...updated_spec};
+        this.dataSource = new MatTableDataSource<Compo>(this.displayCompos);
+        this.dataSource.paginator = this.paginator;
+        this._snackBar.open("修改成功", "关闭")
+      }
+    });
   }
 }

@@ -20,6 +20,9 @@ body {
   --backwardgrey: #7f8c8d;
   --bggrey: rgb(247,249,250);
 }
+.clickable:hover {
+  cursor: pointer;
+}
 .slogan {
   color: var(--logoblue);
 }
@@ -93,6 +96,9 @@ img.scenario-small {
 .fullfill {
   width: 100%;
 }
+.ety-percent-fill {
+  width: 80%;
+}
 .nty-percent-fill {
   width: 90%;
 }
@@ -121,6 +127,9 @@ p.warn, b.warn {
 }
 p.success, b.success {
   color: green;
+}
+p.record {
+  color: midnightblue;
 }
 button.chip {
   margin: 5px;

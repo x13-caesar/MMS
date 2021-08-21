@@ -11,22 +11,12 @@ import {MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {FormControl} from '@angular/forms';
 
-const SCHEMA = {
-  "id": "text",
-  "name": "text",
-  "company": "text",
-  "payment_period": "text",
-  "contact": "text",
-  "address": "text",
-  "notice": "text"
-}
-
 @Component({
   selector: 'app-vendor-list',
   templateUrl: './vendor-list.component.html',
   styleUrls: ['./vendor-list.component.scss']
 })
-export class VendorListComponent implements OnInit, AfterViewInit{
+export class VendorListComponent implements OnInit {
   displayedColumns: string[] = [
     'id', 'name', 'company', 'payment_period',
     'contact', 'address', 'notice', 'edit', 'delete'
@@ -35,13 +25,8 @@ export class VendorListComponent implements OnInit, AfterViewInit{
   searchKeyword = new FormControl('')
   vendors: Vendor[] = [];
   dataSource: any;
-  dataSchema = SCHEMA;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
-
-  ngAfterViewInit() {
-    this.dataSource.paginator = this.paginator;
-  }
 
   constructor(
     private vendorService: VendorService,
