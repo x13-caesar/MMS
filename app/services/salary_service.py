@@ -1,6 +1,8 @@
 from sqlalchemy.orm import Session
 
 from fastapi.encoders import jsonable_encoder
+
+from . import work_service
 from .. import models, schemas
 
 from datetime import datetime
@@ -23,8 +25,8 @@ def get_salaries_by_employee_id(employee_id: int, db: Session):
 
 
 def get_salaries_in_month_range(after: datetime, before: datetime, db: Session):
-    return db.query(models.Employee).filter(models.Employee.month >= after,
-                                            models.Employee.month <= before).all()
+    return db.query(models.Employee).filter(models.Salary.start_date >= after,
+                                            models.Salary.end_date <= before).all()
 
 
 def create_salary(salary: schemas.SalaryCreate, db: Session):
@@ -36,12 +38,18 @@ def create_salary(salary: schemas.SalaryCreate, db: Session):
 
 
 def update_salary(salary: schemas.Salary, db: Session):
-    updated_salary = models.Salary(**salary.dict())
+    json_salary = jsonable_encoder(salary)
+    json_works = json_salary.pop('work')
+    db_salary = models.Salary(**json_salary)
     db.query(models.Salary). \
-        filter(models.Salary.id == updated_salary.id). \
-        update(jsonable_encoder(updated_salary))
+        filter(models.Salary.id == db_salary.id). \
+        update(jsonable_encoder(db_salary))
+    if json_works:
+        for w in json_works:
+            db_work = schemas.Work(**w)
+            work_service.update_work(db_work, db=db)
     db.commit()
-    return db.query(models.Salary).filter(models.Salary.id == updated_salary.id).first()
+    return db.query(models.Salary).filter(models.Salary.id == db_salary.id).first()
 
 
 def delete_salary(salary: schemas.Salary, db: Session):

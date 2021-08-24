@@ -9,6 +9,8 @@
 
   <a class="nav-link" routerLink="/employee" routerLinkActive="active">人员</a>
 
+  <a class="nav-link" routerLink="/salary" routerLinkActive="active">工资</a>
+
   <div fxLayout="row" fxLayoutAlign="end center" >
     <p class="whiteout">欢迎，{{this.jwtTokenService.decodedToken.sub}}</p>
     <button mat-stroked-button class="action navbar-login nav-link" *ngIf="!auth.user; else logoutTemplate" routerLink="/login" routerLinkActive="active"> 登陆 </button>

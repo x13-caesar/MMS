@@ -195,6 +195,10 @@ class WorkBase(BaseModel):
     hour_pay: Optional[float]
     complete_hour: Optional[int]
     plan_unit: int
+    check: bool
+    salary_id: Optional[int]
+    product_name: str
+    process_name: str
 
 
 class WorkCreate(WorkBase):
@@ -305,6 +309,7 @@ class EmployeeBase(BaseModel):
     status: str
     onboard: Optional[datetime]
     notice: Optional[str]
+    last_pay_check: Optional[datetime]
 
 
 class EmployeeCreate(EmployeeBase):
@@ -320,12 +325,15 @@ class Employee(EmployeeBase):
 
 class SalaryBase(BaseModel):
     employee_id: int
-    month: datetime
+    employee_name: str
+    start_date: datetime
+    end_date: datetime
     unit_salary: Optional[float]
     hour_salary: Optional[float]
     deduction: float = 0
     bonus: float = 0
     status: str
+    check_date: Optional[datetime]
 
 
 class SalaryCreate(SalaryBase):
@@ -334,6 +342,7 @@ class SalaryCreate(SalaryBase):
 
 class Salary(SalaryBase):
     id: int
+    work: Optional[List[Work]]
 
     class Config:
         orm_mode = True

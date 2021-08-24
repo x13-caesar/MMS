@@ -8,6 +8,8 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 import {MatTableDataSource} from '@angular/material/table';
 import {environment} from '../../environments/environment';
 import {CreateEmployeeDialogComponent} from './create-employee-dialog/create-employee-dialog.component';
+import {CreateSalaryForOneDialogComponent} from '../salary/create-salary-for-one-dialog/create-salary-for-one-dialog.component';
+import {Salary} from '../shared/models/salary';
 
 @Component({
   selector: 'app-employee',
@@ -39,6 +41,7 @@ export class EmployeeComponent implements OnInit, AfterViewInit{
   ngOnInit(): void {
     this.employeeService.getEmployees().subscribe(
       res => {
+        this.employeeService.employees = res;
         this.employees = res;
         this.dataSource = new MatTableDataSource<Employee>(this.employees);
         this.dataSource.paginator = this.paginator;
@@ -58,8 +61,11 @@ export class EmployeeComponent implements OnInit, AfterViewInit{
     });
 
     dialogRef.afterClosed().subscribe(new_employee => {
-      this.employees.push(new_employee);
-      this.dataSource = new MatTableDataSource<Employee>(this.employees);
+      if (new_employee) {
+        this.employees.push(new_employee);
+        this.dataSource = new MatTableDataSource<Employee>(this.employees);
+      }
+
     });
   }
 
@@ -83,6 +89,27 @@ export class EmployeeComponent implements OnInit, AfterViewInit{
 
   onFailure(eventString: string): void {
     this._snackBar.open(`${eventString}失败`, "关闭");
+  }
+
+  checkLastMonthSalary(emp: Employee) {
+    const flag = new Date();
+    flag.setDate(1);
+    const end_date = new Date(flag.getTime());
+    flag.setMonth(flag.getMonth()-1);
+    const start_date = new Date(flag.getTime());
+    console.log(start_date, end_date)
+    const dialogRef = this.dialog.open(CreateSalaryForOneDialogComponent, {
+      width: environment.MEDIAN_DIALOG_WIDTH,
+      data: {employees: this.employees, target_employee: emp, start_date: start_date, end_date: end_date}
+    });
+
+    dialogRef.afterClosed().subscribe(
+      ret_salary => {
+        if (ret_salary) {
+          this.onSuccess('薪水结算');
+        }
+      }
+    );
   }
 
 }

@@ -4,6 +4,7 @@ import {Observable} from 'rxjs';
 import {Work} from '../models/work';
 import {environment} from '../../../environments/environment';
 import {PostResponse} from '../models/post-response';
+import {BatchProcess} from '../models/batch-process';
 
 @Injectable({
   providedIn: 'root'
@@ -17,8 +18,12 @@ export class WorkService {
     return this.http.get<Work[]>(`${environment.API_URL}/work`)
   }
 
-  getWorkNameById(id: number): Observable<any> {
-    return this.http.get<any>(`${environment.API_URL}/work/only_name/${id}`)
+  getCheckedWorks():  Observable<Work[]> {
+    return this.http.get<Work[]>(`${environment.API_URL}/work/checked`)
+  }
+
+  getUncheckedWorks():  Observable<Work[]> {
+    return this.http.get<Work[]>(`${environment.API_URL}/work/unchecked`)
   }
 
   getWorkById(work_id: number): Observable<Work> {
@@ -30,11 +35,15 @@ export class WorkService {
   }
 
   getWorksInDateRange(after: Date, before: Date): Observable<Work[]> {
-    return this.http.get<Work[]>(`${environment.API_URL}/work/work_date/${after}/${before}`)
+    return this.http.get<Work[]>(`${environment.API_URL}/work/work_date/${after.toISOString()}/${before.toISOString()}`)
   }
 
   getWorksByEmployeeIdAndWorkDate(employee_id: number, after: Date, before: Date): Observable<Work[]> {
-    return this.http.get<Work[]>(`${environment.API_URL}/work/employee_id_and_work_date/${employee_id}/${after}/${before}`)
+    return this.http.get<Work[]>(`${environment.API_URL}/work/employee_id_and_work_date/${employee_id}/${after.toISOString()}/${before.toISOString()}`)
+  }
+
+  getUncheckedWorksByEmployeeIdAndWorkDate(employee_id: number, after: Date, before: Date): Observable<Work[]> {
+    return this.http.get<Work[]>(`${environment.API_URL}/work/unchecked/employee_id_and_work_date/${employee_id}/${after.toISOString()}/${before.toISOString()}`)
   }
 
   postWork(work: Work): Observable<Work> {
@@ -47,5 +56,9 @@ export class WorkService {
 
   deleteWork(work_id: number): Observable<PostResponse> {
     return this.http.delete<PostResponse>(`${environment.API_URL}/work/${work_id}`)
+  }
+
+  sortWorkByDate(works: Work[]): Work[] {
+    return works.sort((a, b) => (Number(a.work_date) - Number(b.work_date)))
   }
 }

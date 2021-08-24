@@ -1,7 +1,7 @@
 <div class="body-container" fxLayout="column" fxLayoutAlign="space-between center">
   <div class="button-container fullfill">
     <button mat-button class="call" (click)="openCreateBatchDialog()"> 创建新生产批次 </button>
-    <button mat-button class="info" routerLink="/history"> 历史生产批次 </button>
+    <button mat-button class="view" routerLink="/history"> 历史生产批次 </button>
   </div>
 
   <div fxLayout="row" fxLayoutAlign="space-between start" class="fullfill">
@@ -99,7 +99,7 @@
               <div class="flex-container">
                 <button mat-raised-button
                         color="accent"
-                        (click)="openCreateWorkDialog(bp)"
+                        (click)="openCreateWorkDialog(bp, selectedBatch.product_name || '')"
                         [disabled]="!(!bp.process?.process_component || !!bp.warehouse_record)">添加参与工人</button>
                 <button mat-raised-button
                         color="primary"

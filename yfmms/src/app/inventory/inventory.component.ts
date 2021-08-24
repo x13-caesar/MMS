@@ -12,6 +12,7 @@ import {CreateDeliveryDialogComponent} from '../delivery/create-delivery-dialog/
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {FormBuilder, FormControl, FormGroup} from '@angular/forms';
 import {Compo} from '../shared/models/compo';
+import {EditProductDialogComponent} from './edit-product-dialog/edit-product-dialog.component';
 
 @Component({
   selector: 'app-inventory',
@@ -94,7 +95,21 @@ export class InventoryComponent implements OnInit {
   }
 
   openEditProductDialog(product: Product) {
+    const dialogRef = this.dialog.open(EditProductDialogComponent, {
+      width: environment.SMALL_DIALOG_WIDTH,
+      data: {product: product}
+    });
 
+    dialogRef.afterClosed().subscribe(
+      res => {
+        const targetIdx1 = this.products.findIndex(prod => prod.id === res.id);
+        const targetIdx2 = this.displayProducts.findIndex(prod => prod.id === res.id);
+        this.products[targetIdx1] = res;
+        this.displayProducts[targetIdx2] = res;
+        this.dataSource = new MatTableDataSource<Product>(this.displayProducts);
+        this.onSuccess('编辑')
+      }
+    )
   }
 
   onSuccess(eventString: string): void {

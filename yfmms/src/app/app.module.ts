@@ -41,6 +41,10 @@ import { DeliveryComponent } from './delivery/delivery.component';
 import { CreateDeliveryDialogComponent } from './delivery/create-delivery-dialog/create-delivery-dialog.component';
 import { BuyerListComponent } from './buyer-list/buyer-list.component';
 import { CreateBuyerDialogComponent } from './buyer-list/create-buyer-dialog/create-buyer-dialog.component';
+import { EditProductDialogComponent } from './inventory/edit-product-dialog/edit-product-dialog.component';
+import { SalaryComponent } from './salary/salary.component';
+import { CreateSalaryForOneDialogComponent } from './salary/create-salary-for-one-dialog/create-salary-for-one-dialog.component';
+import { CreateSalaryForAllComponent } from './salary/create-salary-for-all/create-salary-for-all.component';
 
 @NgModule({
   declarations: [
@@ -77,7 +81,11 @@ import { CreateBuyerDialogComponent } from './buyer-list/create-buyer-dialog/cre
     DeliveryComponent,
     CreateDeliveryDialogComponent,
     BuyerListComponent,
-    CreateBuyerDialogComponent
+    CreateBuyerDialogComponent,
+    EditProductDialogComponent,
+    SalaryComponent,
+    CreateSalaryForOneDialogComponent,
+    CreateSalaryForAllComponent
   ],
     imports: [
       HttpClientModule,

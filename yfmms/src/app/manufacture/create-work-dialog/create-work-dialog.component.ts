@@ -12,10 +12,12 @@ import {WorkService} from '../../shared/services/work.service';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {WorkSpecificationService} from '../../shared/services/work-specification.service';
 import {SpecService} from '../../shared/services/spec.service';
+import {EmployeeService} from '../../shared/services/employee.service';
 
 class DialogData {
   bp!: BatchProcess;
-  employees!: Employee[]
+  employees!: Employee[];
+  product_name!: string;
 }
 
 @Component({
@@ -43,6 +45,7 @@ export class CreateWorkDialogComponent implements OnInit {
     @Inject(MAT_DIALOG_DATA) public data: DialogData,
     private formBuilder: FormBuilder,
     private workService: WorkService,
+    public employeeService: EmployeeService,
     private wsService: WorkSpecificationService,
     private specService: SpecService,
     public _snackBar: MatSnackBar
@@ -72,18 +75,18 @@ export class CreateWorkDialogComponent implements OnInit {
     return this.employees.filter(e => e.name.includes(value));
   }
 
-  employeeDisplayFn(emp: Employee): string {
-    return emp && emp.name ? `${emp.name} | ${emp.id}` : '';
-  }
-
   onWorkConfirm(): void {
     const work_specification_array: WorkSpecification[] = [];
     this.new_work = {
+      complete_hour: 0, complete_unit: 0, hour_pay: 0, unit_pay: 0,
       batch_process_id: this.batchProcess.id || 0,
       employee_id: this.selectedEmployee.value.id,
       employee_name: this.selectedEmployee.value.name,
+      product_name: this.data.product_name,
+      process_name: this.batchProcess.process?.process_name || '',
       work_date: this.work_date.value,
       plan_unit: this.plan_unit.value,
+      check: false
     }
     this.workService.postWork(this.new_work).subscribe(
       res_work => {

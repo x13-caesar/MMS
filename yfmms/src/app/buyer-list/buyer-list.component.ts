@@ -15,10 +15,9 @@ import {CreateBuyerDialogComponent} from './create-buyer-dialog/create-buyer-dia
   styleUrls: ['./buyer-list.component.scss']
 })
 export class BuyerListComponent implements OnInit {
-  displayedColumns: string[] = [
-    'name', 'company', 'payment_period',
-    'contact', 'address', 'notice', 'edit'
-  ];
+  displayedProperties = ['name', 'company','payment_period', 'contact', 'address', 'notice', 'edit'];
+  displayedColumns = new Map([['name', '联系人姓名'], ['company','公司'], ['payment_period', '账期'],
+    ['contact', '联系方式'], ['address', '地址'], ['notice', '备注'], ['edit', '编辑']]);
 
   searchKeyword = new FormControl('')
   buyers: Buyer[] = [];

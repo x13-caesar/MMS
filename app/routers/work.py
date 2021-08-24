@@ -23,27 +23,31 @@ def read_works(db: Session = Depends(get_db)):
     return works
 
 
-@router.get("/{work_id}", response_model=schemas.Work)
+@router.get("/work_id/{work_id}", response_model=schemas.Work)
 def read_work(work_id: int, db: Session = Depends(get_db)):
     work = work_service.get_work(work_id=work_id, db=db)
-    if work is None:
-        raise HTTPException(status_code=404, detail="Work not found")
     return work
+
+
+@router.get("/checked", response_model=List[schemas.Work])
+def read_checked_works(db: Session = Depends(get_db)):
+    return work_service.get_works_by_check_status(True, db=db)
+
+
+@router.get("/unchecked", response_model=List[schemas.Work])
+def read_unchecked_works(db: Session = Depends(get_db)):
+    return work_service.get_works_by_check_status(False, db=db)
 
 
 @router.get("/batch_process_id/{batch_process_id}")
 def read_works_by_product_id(batch_process_id: int, db: Session = Depends(get_db)):
     works = work_service.get_works_by_batch_process_id(batch_process_id=batch_process_id, db=db)
-    if not works:
-        raise HTTPException(status_code=404, detail="No work found")
     return works
 
 
 @router.get("/employee_id/{employee_id}")
 def read_works_by_employee_id(employee_id: int, db: Session = Depends(get_db)):
     works = work_service.get_works_by_employee_id(employee_id=employee_id, db=db)
-    if not works:
-        raise HTTPException(status_code=404, detail="No work found")
     return works
 
 
@@ -52,19 +56,26 @@ def read_works_in_work_date_range(after: datetime, before: datetime, db: Session
     works = work_service.get_works_in_work_date_range(after=after,
                                                       before=before,
                                                       db=db)
-    if not works:
-        raise HTTPException(status_code=404, detail="No work found")
     return works
 
 
+# All datetime passed by path params should be in format "YYYY-MM-DD"
 @router.get("/employee_id_and_work_date/{employee_id}/{after}/{before}")
 def read_works_by_employee_id_and_work_date_range(employee_id: int, after: datetime, before: datetime, db: Session = Depends(get_db)):
     works = work_service.get_works_by_employee_id_and_work_date_range(employee_id=employee_id,
                                                                       after=after,
                                                                       before=before,
                                                                       db=db)
-    if not works:
-        raise HTTPException(status_code=404, detail="No work found")
+    return works
+
+
+@router.get("/unchecked/employee_id_and_work_date/{employee_id}/{after}/{before}")
+def read_unchecked_works_by_employee_id_and_work_date_range(employee_id: int, after: datetime, before: datetime, db: Session = Depends(get_db)):
+    works = work_service.get_unchecked_works_by_employee_id_and_work_date_range(
+        employee_id=employee_id,
+        after=after,
+        before=before,
+        db=db)
     return works
 
 

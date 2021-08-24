@@ -17,6 +17,7 @@ import {HistoryComponent} from './manufacture/history/history.component';
 import {EmployeeComponent} from './employee/employee.component';
 import {DeliveryComponent} from './delivery/delivery.component';
 import {BuyerListComponent} from './buyer-list/buyer-list.component';
+import {SalaryComponent} from './salary/salary.component';
 
 const routes: Routes = [
   {
@@ -37,15 +38,13 @@ const routes: Routes = [
     component: StockComponent
   },
   { path: 'manufacture', component: ManufactureComponent },
-  { path: 'manufacture/:batch_id', component: ManufactureComponent},
+  { path: 'manufacture/:batch_id', component: ManufactureComponent },
   {
     path: 'history',
     component: HistoryComponent
   },
-  {
-    path: 'employee',
-    component: EmployeeComponent
-  },
+  { path: 'employee', component: EmployeeComponent },
+  { path: 'salary', component: SalaryComponent},
   {
     path: 'delivery',
     component: DeliveryComponent

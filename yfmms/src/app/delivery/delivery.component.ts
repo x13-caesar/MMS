@@ -16,13 +16,15 @@ import {ProductService} from '../shared/services/product.service';
   styleUrls: ['./delivery.component.scss']
 })
 export class DeliveryComponent implements OnInit {
-  displayedColumns: string[] = [
+  displayedProperties: string[] = [
     'product_name', 'buyer_company', 'amount',
     'order_id', 'deliver_date',
     'unit_price', 'total_price', 'notice',
-    'edit', 'delete'
+    'edit'
   ];
-  editableColumns: string[] = [
+  displayedColumns = new Map([['product_name', '产品名称'], ['buyer_company','客户公司'], ['amount', '交付数量'],
+    ['order_id', '客户订单号'], ['deliver_date', '交付日期'], ['unit_price', '单价'], ['total_price', '总价'], ['notice', '备注'], ['edit', '编辑']]);
+  editableProperties: string[] = [
     'amount', 'order_id', 'deliver_date', 'unit_price', 'notice'
   ];
 
@@ -45,7 +47,7 @@ export class DeliveryComponent implements OnInit {
         this.deliveries = res;
         this.deliveries.forEach(d => {
           this.productService.getProductNameById(d.product_id).subscribe(
-            res => d.product_name = res);
+            res => d.product_name = res.name);
           d.buyer_company = d.buyer?.company;
         });
         this.dataSource = new MatTableDataSource<Delivery>(this.deliveries);
@@ -62,11 +64,12 @@ export class DeliveryComponent implements OnInit {
 
   openCreateDeliveryDialog(): void {
     const dialogRef = this.dialog.open(CreateDeliveryDialogComponent, {
-      width: environment.MEDIAN_DIALOG_WIDTH
+      width: environment.MEDIAN_DIALOG_WIDTH,
     });
 
     dialogRef.afterClosed().subscribe(new_delivery => {
       if (new_delivery) {
+        this.onSuccess('创建新交付记录');
         this.deliveries.push(new_delivery);
         this.dataSource = new MatTableDataSource<Delivery>(this.deliveries);
       }
@@ -82,8 +85,8 @@ export class DeliveryComponent implements OnInit {
 
   onDeliverySubmit(delivery: Delivery): void {
     this.deliveryService.putDelivery(delivery).subscribe(
-      res => this.onSuccess('修改供应商'),
-      error => this.onFailure('修改供应商')
+      res => this.onSuccess('修改交付记录'),
+      error => this.onFailure('修改交付记录')
     )
   }
 

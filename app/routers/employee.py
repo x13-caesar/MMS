@@ -96,6 +96,18 @@ def create_employee(employee: schemas.EmployeeCreate, db: Session = Depends(get_
     return employee_service.create_employee(employee=employee, db=db)
 
 
+@router.put("/last_pay_check")
+def update_employee(employee_id: int,
+                    last_pay_check: datetime,
+                    db: Session = Depends(get_db)):
+    db_employee_data = employee_service.get_employee(employee_id, db=db)
+    if not db_employee_data:
+        raise HTTPException(status_code=400, detail="Matching employee not found")
+    db_employee_model = schemas.Employee(**jsonable_encoder(db_employee_data))
+    db_employee_model.last_pay_check = last_pay_check
+    return employee_service.update_employee(employee=db_employee_model, db=db)
+
+
 @router.put("/")
 def update_employee(employee: schemas.Employee,
                    db: Session = Depends(get_db)):

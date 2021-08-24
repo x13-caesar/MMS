@@ -161,10 +161,10 @@ export class ManufactureComponent implements OnInit {
     this.step--;
   }
 
-  openCreateWorkDialog(bp: BatchProcess): void {
+  openCreateWorkDialog(bp: BatchProcess, product_name: string): void {
     const dialogRef = this.dialog.open(CreateWorkDialogComponent, {
       width: environment.MEDIAN_DIALOG_WIDTH,
-      data: {bp: bp, employees: this.workingEmployees}
+      data: {bp: bp, employees: this.workingEmployees, product_name: product_name}
     });
 
     dialogRef.afterClosed().subscribe(

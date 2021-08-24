@@ -24,14 +24,25 @@ def get_works_by_employee_id(employee_id: int, db: Session):
 
 
 def get_works_in_work_date_range(after: datetime, before: datetime, db: Session):
-    return db.query(Work).filter(Work.execute_time >= after,
-                                        Work.execute_time <= before).all()
+    return db.query(Work).filter(Work.work_date >= after,
+                                 Work.work_date <= before).all()
 
 
 def get_works_by_employee_id_and_work_date_range(employee_id: int, after: datetime, before: datetime, db: Session):
     return db.query(Work).filter(Work.employee_id == employee_id,
-                                        Work.execute_time >= after,
-                                        Work.execute_time <= before).all()
+                                 Work.work_date >= after,
+                                 Work.work_date <= before).all()
+
+
+def get_unchecked_works_by_employee_id_and_work_date_range(employee_id: int, after: datetime, before: datetime, db: Session):
+    return db.query(Work).filter(Work.employee_id == employee_id,
+                                 Work.work_date >= after,
+                                 Work.work_date <= before,
+                                 Work.check == False).all()
+
+
+def get_works_by_check_status(check: bool, db: Session):
+    return db.query(Work).filter(Work.check == check).all()
 
 
 def create_work(work: schemas.WorkCreate, db: Session):
@@ -49,11 +60,12 @@ def update_work(work: schemas.Work, db: Session):
     db.query(Work). \
         filter(Work.id == db_work.id). \
         update(json_work)
-    for ws in json_work_specifications:
-        db_ws = WorkSpecification(**ws)
-        db.query(WorkSpecification). \
-            filter(WorkSpecification.id == db_ws.id). \
-            update(ws)
+    if json_work_specifications:
+        for ws in json_work_specifications:
+            db_ws = WorkSpecification(**ws)
+            db.query(WorkSpecification). \
+                filter(WorkSpecification.id == db_ws.id). \
+                update(ws)
     db.commit()
     return db.query(Work).filter(Work.id == db_work.id).first()
 

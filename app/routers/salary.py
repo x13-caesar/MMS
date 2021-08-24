@@ -68,13 +68,14 @@ def create_salary(salary: schemas.SalaryCreate, db: Session = Depends(get_db)):
     return salary_service.create_salary(salary=salary, db=db)
 
 
-@router.put("/")
+@router.put("/", response_model=schemas.Salary)
 def update_salary(salary: schemas.Salary,
                    db: Session = Depends(get_db)):
     db_salary_data = salary_service.get_salary(salary.id, db=db)
     if not db_salary_data:
         raise HTTPException(status_code=400, detail="Matching salary not found")
-    db_salary_model = schemas.Salary(**jsonable_encoder(db_salary_data))
+    json_salary = jsonable_encoder(db_salary_data)
+    db_salary_model = schemas.Salary(**json_salary)
     update_data = salary.dict(exclude_unset=True)
     updated_salary = db_salary_model.copy(update=update_data)
     return salary_service.update_salary(salary=updated_salary, db=db)

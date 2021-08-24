@@ -8,6 +8,7 @@ import {environment} from '../../../environments/environment';
   providedIn: 'root'
 })
 export class EmployeeService {
+  public employees: Employee[] = [];
 
   constructor(private http: HttpClient) { }
 
@@ -33,5 +34,17 @@ export class EmployeeService {
 
   putEmployee(employee: Employee): Observable<Employee> {
     return this.http.put<Employee>(`${environment.API_URL}/employee`, employee)
+  }
+
+  employeeDisplayFn(emp: Employee): string {
+    return emp && emp.name ? `${emp.name} | ${emp.id}` : '';
+  }
+
+  employeeAutocompleteFilter(value: string, employees: Employee[] = this.employees): Employee[] {
+    return employees.filter(e => e.name.includes(value) || String(e.id) === value);
+  }
+
+  updateLastPayCheck(employee_id: number, last_pay_check: Date) {
+    return this.http.put<Employee>(`${environment.API_URL}/employee/last_check_date`, {employee_id: employee_id, last_pay_check: last_pay_check})
   }
 }

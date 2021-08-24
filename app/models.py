@@ -191,6 +191,7 @@ class Employee(Base):
     status = Column(String)
     onboard = Column(DateTime)
     notice = Column(String)
+    last_pay_check = Column(DateTime)
 
 
 class Salary(Base):
@@ -198,12 +199,16 @@ class Salary(Base):
 
     id = Column(Integer, primary_key=True)
     employee_id = Column(Integer, ForeignKey('employee.id'))
-    month = Column(DateTime)
+    employee_name = Column(String, ForeignKey('employee.name'))
+    start_date = Column(DateTime)
+    end_date = Column(DateTime)
     unit_salary = Column(Float)
     hour_salary = Column(Float)
     deduction = Column(Float)
     bonus = Column(Float)
     status = Column(String)
+    work = relationship("Work", backref="salary")
+    check_date = Column(DateTime)
 
 
 class Work(Base):
@@ -219,6 +224,10 @@ class Work(Base):
     hour_pay = Column(Float)
     complete_hour = Column(Integer)
     plan_unit = Column(Integer)
+    check = Column(Boolean)
+    salary_id = Column(Integer, ForeignKey('salary.id'))
+    product_name = Column(String, ForeignKey('product.name'))
+    process_name = Column(String, ForeignKey('process.process_name'))
     # warehouse_record = relationship("WarehouseRecord",
     #                                 primaryjoin="Work.batch_process_id == foreign(WarehouseRecord.batch_process_id)")
 
