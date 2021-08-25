@@ -8,5 +8,6 @@ export interface Employee {
   department?: string,
   status: string,
   onboard?: Date,
-  notice?: string
+  notice?: string,
+  last_pay_check?: Date
 }

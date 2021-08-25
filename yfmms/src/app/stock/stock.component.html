@@ -26,8 +26,8 @@
       <button mat-stroked-button color="warn" (click)="checkWarns()">查看危险库存</button>
       <button mat-flat-button (click)="emptyFilter()">清空筛选</button>
     </form>
-    <button mat-button class="call" [routerLink]="['/create-spec']"> 创建新配件/规格 </button>
-    <button mat-button class="call" [routerLink]="['/vendors']"> 供应商列表 </button>
+    <button mat-button class="call" [routerLink]="['/create-spec']" [disabled]="jwtTokenService.getRole()==='employee'"> 创建新配件/规格 </button>
+    <button mat-button class="view" [routerLink]="['/vendors']"> 供应商列表 </button>
   </div>
   <div class="data-table">
     <table mat-table
@@ -38,13 +38,13 @@
         <td mat-cell *matCellDef="let element">
           <div>
             <div class="btn-edit" *ngIf="col ==='edit' ; spanHeader">
-              <button mat-icon-button (click)="openEditCompoDialog(element)"><mat-icon>edit</mat-icon></button>
+              <button mat-icon-button (click)="openEditCompoDialog(element)" [disabled]="jwtTokenService.getRole()==='employee'"><mat-icon>edit</mat-icon></button>
             </div>
             <div class="btn-delete" *ngIf="col ==='delete' ; spanHeader">
-              <button mat-icon-button (click)="openDeleteCompoDialog(element)"><mat-icon>delete</mat-icon></button>
+              <button mat-icon-button (click)="openDeleteCompoDialog(element)" [disabled]="jwtTokenService.getRole()==='employee'"><mat-icon>delete</mat-icon></button>
             </div>
             <span #spanHeader>
-              {{element[col]}}
+              <p [attr.class]="dangerousCompos.includes(element) && col==='warn_stock' ? 'mat-h3 warn' : ''">{{element[col]}}</p>
             </span>
           </div>
         </td>
@@ -62,12 +62,15 @@
                 </mat-card-header>
                 <mat-card-content>
                   <p>规格号：{{spec.id}}</p>
-                  <p>价格（税前|税后）：{{spec.net_price || '无记录'}} | {{spec.gross_price || '无记录'}}</p>
+                  <p *ngIf="jwtTokenService.getRole() === 'omni'">价格（税前|税后）：{{spec.net_price || '无记录'}} | {{spec.gross_price || '无记录'}}</p>
                   <p class="mat-h3 info">库存：{{spec.stock}}</p>
                 </mat-card-content>
                 <mat-card-actions>
-                  <button mat-stroked-button color="primary" (click)="openEditSpecDialog(spec, element.name)">修改</button>
-                  <button mat-stroked-button color="warn">删除</button>
+                  <button mat-stroked-button color="primary"
+                          (click)="openEditSpecDialog(spec, element.name)"
+                          [disabled]="jwtTokenService.getRole()==='employee'">修改</button>
+                  <button mat-stroked-button color="warn"
+                          [disabled]="jwtTokenService.getRole()==='employee'">删除</button>
                 </mat-card-actions>
               </mat-card>
             </div>

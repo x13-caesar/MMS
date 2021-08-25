@@ -33,9 +33,11 @@ export class LoginComponent implements OnInit {
     this.auth.login(form.value || form).subscribe({
       next: res => {
         if (res.access_token) {
-          console.log("Login succeed!")
           this.jwtToken.setToken(res.access_token);
+          localStorage.setItem ('token', res.access_token);
           this.jwtToken.decodeToken();
+          console.log(`Login succeed!`);
+          console.log(this.auth.user);
           this.router.navigateByUrl('/overview');
           }
         },

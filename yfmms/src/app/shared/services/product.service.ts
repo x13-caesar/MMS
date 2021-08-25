@@ -53,4 +53,12 @@ export class ProductService {
   deleteProduct(product_id: number): Observable<PostResponse> {
     return this.http.delete<PostResponse>(`${environment.API_URL}/products/${product_id}`)
   }
+
+  productDisplayFn(prod: Product) {
+    return prod && `${prod.name} | ${prod.id}`
+  }
+
+  productAutocompleteFilter(input: string, products: Product[]) {
+    return products.filter(p => p.name.includes(input) || String(p.id).includes(input));
+  }
 }

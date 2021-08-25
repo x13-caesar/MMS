@@ -17,6 +17,7 @@
           <div *ngIf="!element.isEdit">
             <div class="btn-edit" *ngIf="col ==='edit' ; spanHeader">
               <button mat-icon-button (click)="element.isEdit = !element.isEdit"><mat-icon>edit</mat-icon></button>
+              <button mat-stroked-button (click)="checkLastMonthSalary(element)"> 结算上月工资 </button>
             </div>
             <span #spanHeader>
               {{element[col]}}
@@ -24,7 +25,7 @@
           </div>
           <div *ngIf="element.isEdit">
             <div class="btn-edit" *ngIf="col === 'edit'; else dataField">
-              <button mat-icon-button (click)="element.isEdit = !element.isEdit; onEmployeeSubmit(element);"><mat-icon>done</mat-icon></button>
+              <button mat-icon-button (click)="element.isEdit = !element.isEdit; onEmployeeSubmit(element);"><mat-icon>check</mat-icon></button>
             </div>
             <ng-template #dataField>
               <mat-form-field>

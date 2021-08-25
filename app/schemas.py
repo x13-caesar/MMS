@@ -24,6 +24,7 @@ class Vendor(VendorBase):
 
 
 class ComponentBase(BaseModel):
+    id: str
     name: str
     category: str
     material: Optional[str]
@@ -62,7 +63,6 @@ class Specification(SpecificationBase):
 
 
 class Component(ComponentBase):
-    id: str
     specification: Optional[List[Specification]]
 
     class Config:

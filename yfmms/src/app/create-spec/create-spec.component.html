@@ -8,14 +8,20 @@
         <mat-card-title> 新配件 </mat-card-title>
       </mat-card-header>
       <mat-card-content>
-        <div class="button-container clearfix">
-          <button mat-raised-button color="primary" class="centered" (click)="showCreateSpec=true"> 为已存在配件添加供应商规格<mat-icon>open_in_new</mat-icon> </button>
+        <div class="button-container clearfix" fxLayout="row" fxLayoutAlign="center center" >
+          <button mat-raised-button class="chip"> 查看编码规则 </button>
+          <button mat-raised-button class="call" (click)="showCreateSpec=true"> 为已存在配件添加供应商规格<mat-icon>open_in_new</mat-icon> </button>
         </div>
         <form fxLayout="column" fxLayoutAlign="space-around center" [formGroup]="compoGroup" (ngSubmit)="onCompoSubmit(compoGroup)">
           <mat-form-field appearance="outline">
             <mat-label>配件名称</mat-label>
             <input matInput formControlName="name">
             <mat-hint align="end">可以与其他产品重复</mat-hint>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>配件编码</mat-label>
+            <input type="text" matInput formControlName="id">
+            <mat-hint align="end">请遵循既定编码规则</mat-hint>
           </mat-form-field>
           <mat-form-field appearance="outline">
             <mat-label>分类</mat-label>
@@ -62,8 +68,8 @@
       </mat-card-header>
       <mat-card-content>
         <div class="button-container clearfix" fxLayout="row" fxLayoutAlign="center center">
-          <button mat-raised-button [routerLink]="'/vendors'"> 查看供应商<mat-icon>store</mat-icon> </button>
-          <button mat-raised-button (click)="openCreateVendorDialog()"> 添加新供应商<mat-icon>store</mat-icon> </button>
+          <button mat-raised-button class="chip" [routerLink]="'/vendors'"> 查看供应商<mat-icon>store</mat-icon> </button>
+          <button mat-raised-button color="primary" (click)="openCreateVendorDialog()"> 添加新供应商<mat-icon>store</mat-icon> </button>
         </div>
         <form fxLayout="column" fxLayoutAlign="space-around center" [formGroup]="specGroup" (ngSubmit)="onSpecSubmit(specGroup)">
           <mat-form-field appearance="outline">
@@ -116,7 +122,7 @@
           </mat-form-field>
 
           <div class="button-container">
-            <button type="submit" [disabled]="!specGroup.valid">确认添加</button>
+            <button mat-raised-button color="primary" type="submit" [disabled]="!specGroup.valid">确认添加</button>
           </div>
         </form>
       </mat-card-content>

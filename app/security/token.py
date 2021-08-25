@@ -23,5 +23,14 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = 
     access_token = token_service.create_access_token(data={"sub": user.username,
                                                            "role": user.role},
                                                      expires_delta=access_token_expires)
-    print("[!] GET TOKEN! ", access_token)
-    return {"success": True, "access_token": access_token, "token_type": "bearer"}
+    return {"access_token": access_token, "token_type": "bearer"}
+
+
+@router.post("/get_user", response_model=schemas.Token)
+async def get_user(user_token: str):
+    return token_service.get_current_user(user_token)
+
+
+@router.post("/check_login", response_model=schemas.Token)
+async def check_login(user_token: str):
+    return token_service.get_current_user(user_token)

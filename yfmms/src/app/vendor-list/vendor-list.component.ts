@@ -10,6 +10,7 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 import {MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {FormControl} from '@angular/forms';
+import {JWTTokenService} from '../shared/services/jwt-token.service';
 
 @Component({
   selector: 'app-vendor-list',
@@ -29,6 +30,7 @@ export class VendorListComponent implements OnInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   constructor(
+    public jwtTokenService: JWTTokenService,
     private vendorService: VendorService,
     public dialog: MatDialog,
     public _snackBar: MatSnackBar
@@ -56,8 +58,10 @@ export class VendorListComponent implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe(new_vendor => {
-      this.vendors.push(new_vendor);
-      this.dataSource = new MatTableDataSource<Vendor>(this.vendors);
+      if (new_vendor) {
+        this.vendors.push(new_vendor);
+        this.dataSource = new MatTableDataSource<Vendor>(this.vendors);
+      }
     });
   }
 

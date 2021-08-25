@@ -124,7 +124,7 @@ export class CreateProductComponent implements OnInit {
           component_name: compo.name
         }
         return pc;
-      })
+      });
     this.processOfProduct.push(newProcess);
     this.processGroup.reset();
     this.selectedCompo.reset();

@@ -42,6 +42,7 @@ export class CreateSpecComponent implements OnInit {
 
   ngOnInit(): void {
     this.compoGroup = this.formBuilder.group({
+      id: new FormControl('', Validators.required),
       name: new FormControl('', Validators.required),
       category: new FormControl('', Validators.required),
       material: new FormControl(''),
@@ -134,7 +135,9 @@ export class CreateSpecComponent implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      this.vendors.push(result);
+      if (result) {
+        this.vendors.push(result);
+      }
     });
   }
 

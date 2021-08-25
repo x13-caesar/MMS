@@ -88,6 +88,7 @@ def create_product(product: schemas.ProductCreate, db: Session = Depends(get_db)
         process.id = str(product.id) + str(process.process_order).rjust(2, '0')
         process.product_id = product.id
         for idx, process_component in enumerate(process.process_component):
+            print(process_component)
             process_component.id = str(process.id) + str(idx+1).rjust(2, '0')
             process_component.process_id = process.id
             process_component_service.create_process_component(process_component, db=db)

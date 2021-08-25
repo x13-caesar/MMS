@@ -74,8 +74,8 @@ img.scenario-small {
   color: var(--darkblue);
 }
 .body-container {
-  width: 85%;
-  margin-top: 25px;
+  padding-left: 10%;
+  padding-right: 10%;
   margin-left: auto;
   margin-right: auto;
 }
@@ -96,6 +96,11 @@ img.scenario-small {
 .fullfill {
   width: 100%;
 }
+.main-content {
+  padding-left: 10%;
+  padding-right: 10%;
+  align-items: center;
+}
 .ety-percent-fill {
   width: 80%;
 }
@@ -108,6 +113,14 @@ img.scenario-small {
   left: 50%;
   /* bring your own prefixes */
   transform: translate(-50%, -50%);
+}
+p.vertical-middle {
+  position: absolute;
+  /* 2 */
+  top: 50%;
+  /* 3 */
+  transform: translate(-50%, -50%);
+  /* 4 */
 }
 p.highlight, b.highlight {
   color: var(--logoblue);
@@ -125,11 +138,19 @@ p.info, b.info {
 p.warn, b.warn {
   color: var(--warnred);
 }
+p.super-warn {
+  background-color: red;
+  color: white;
+}
 p.success, b.success {
   color: green;
 }
 p.record {
   color: midnightblue;
+}
+p.piece {
+  magin-left: 5px;
+  margin-right: 5px;
 }
 button.chip {
   margin: 5px;
@@ -161,10 +182,15 @@ button.next {
   color: var(--logoblue);
   border: groove 1px var(--logoblue);
 }
-button.back {
+button.view {
   margin: 5px;
-  color: var(--backwardgrey);
-  border: groove 1px var(--backwardgrey);
+  color: midnightblue;
+  background-color: powderblue;
+}
+button.export {
+  margin: 5px;
+  color: whitesmoke;
+  background-color: darkolivegreen;
 }
 button.option {
   margin: 5px;
@@ -193,6 +219,9 @@ button.option:hover {
 }
 div.distance {
   padding: 2%;
+}
+div.isolated {
+  margin: 2%;
 }
 div.justify {
   display: flex;

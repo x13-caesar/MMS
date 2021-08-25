@@ -21,7 +21,9 @@ def get_process_components_by_component_id(component_id: str, db: Session):
 
 
 def create_process_component(process_component: schemas.ProcessComponentCreate, db: Session):
-    new_process_component = models.ProcessComponent(**process_component.dict())
+    json_pc = jsonable_encoder(process_component)
+    json_pc.pop('component')
+    new_process_component = models.ProcessComponent(**json_pc)
     db.add(new_process_component)
     db.commit()
     db.refresh(new_process_component)
