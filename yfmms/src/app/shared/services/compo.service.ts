@@ -34,4 +34,17 @@ export class CompoService {
   deleteCompo(compo_id: string): Observable<PostResponse> {
     return this.http.delete<PostResponse>(`${environment.API_URL}/components/${compo_id}`)
   }
+
+  compoSearchFilter(compos: Compo[], changes: any): Compo[] {
+    changes.category && (changes.category = changes.categories.toUpperCase());
+    changes.material && (changes.material = changes.material.toUpperCase());
+    changes.keyword && (changes.keyword = changes.keyword.toUpperCase());
+    return compos
+      .filter(compo => !changes.category || (compo.category.toUpperCase() === changes.category))
+      .filter(compo => !changes.material || (compo.material?.toUpperCase() === changes.material))
+      .filter(compo => compo.id?.includes(changes.keyword)
+        || compo.name.toUpperCase().includes(changes.keyword)
+        || compo.description?.toUpperCase().includes(changes.keyword)
+        || (compo.notice && compo.notice.toUpperCase().includes(changes.keyword)))
+  }
 }

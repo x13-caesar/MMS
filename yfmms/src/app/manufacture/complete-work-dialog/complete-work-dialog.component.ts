@@ -22,6 +22,7 @@ export class CompleteWorkDialogComponent implements OnInit {
   workCompleteGroup!: FormGroup;
   methodCtrl = new FormControl('', Validators.required);
   methods: method[] = [{method: 'complete_unit', display: '计件'}, {method: 'complete_hour', display: '计时'}]
+  isByHour: boolean = false;
 
   constructor(
     public dialogRef: MatDialogRef<CompleteWorkDialogComponent>,
@@ -31,7 +32,7 @@ export class CompleteWorkDialogComponent implements OnInit {
 
   ngOnInit(): void {
     this.workCompleteGroup = this.formBuilder.group({
-      complete_unit: new FormControl('', Validators.required),
+      complete_unit: new FormControl(0, Validators.required),
       complete_hour: new FormControl(null)
     })
   }

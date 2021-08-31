@@ -39,7 +39,7 @@ export class CreateBatchDialogComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.productService.getProducts().subscribe(
+    this.productService.getValidProducts().subscribe(
       res => this.products = res,
       error => console.log(error))
     this.batchGroup = this.formBuilder.group({

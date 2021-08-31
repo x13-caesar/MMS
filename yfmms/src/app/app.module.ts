@@ -10,13 +10,11 @@ import { OverviewComponent } from './overview/overview.component';
 import { TransmissionComponent } from './transmission/transmission.component';
 import { ManufactureComponent } from './manufacture/manufacture.component';
 import { InventoryComponent } from './inventory/inventory.component';
-import { HrComponent } from './hr/hr.component';
 import { ProcessCompleteDialogComponent } from './manufacture/process-complete-dialog/process-complete-dialog.component';
 import { BatchCompleteDialogComponent } from './manufacture/batch-complete-dialog/batch-complete-dialog.component';
 import { CreateSpecComponent } from './create-spec/create-spec.component';
 import { CreateProductComponent } from './create-product/create-product.component';
 import { CreateEmployeeComponent } from './create-employee/create-employee.component';
-import { WorkRecordDialogComponent } from './hr/work-record-dialog/work-record-dialog.component';
 import { StockComponent } from './stock/stock.component';
 import { PullInDialogComponent } from './stock/pull-in-dialog/pull-in-dialog.component';
 import { LoginComponent } from './login/login.component';
@@ -45,6 +43,11 @@ import { EditProductDialogComponent } from './inventory/edit-product-dialog/edit
 import { SalaryComponent } from './salary/salary.component';
 import { CreateSalaryForOneDialogComponent } from './salary/create-salary-for-one-dialog/create-salary-for-one-dialog.component';
 import { CreateSalaryForAllComponent } from './salary/create-salary-for-all/create-salary-for-all.component';
+import { AddDayInvoiceDialogComponent } from './manufacture/add-day-invoice-dialog/add-day-invoice-dialog.component';
+import { CopyProductDialogComponent } from './inventory/copy-product-dialog/copy-product-dialog.component';
+import { ConfirmDeprecateDialogComponent } from './inventory/confirm-deprecate-dialog/confirm-deprecate-dialog.component';
+import { DeprecatedComponent } from './inventory/deprecated/deprecated.component';
+import { BatchSummaryComponent } from './manufacture/batch-summary/batch-summary.component';
 
 @NgModule({
   declarations: [
@@ -54,13 +57,11 @@ import { CreateSalaryForAllComponent } from './salary/create-salary-for-all/crea
     TransmissionComponent,
     ManufactureComponent,
     InventoryComponent,
-    HrComponent,
     ProcessCompleteDialogComponent,
     BatchCompleteDialogComponent,
     CreateSpecComponent,
     CreateProductComponent,
     CreateEmployeeComponent,
-    WorkRecordDialogComponent,
     StockComponent,
     PullInDialogComponent,
     LoginComponent,
@@ -85,7 +86,12 @@ import { CreateSalaryForAllComponent } from './salary/create-salary-for-all/crea
     EditProductDialogComponent,
     SalaryComponent,
     CreateSalaryForOneDialogComponent,
-    CreateSalaryForAllComponent
+    CreateSalaryForAllComponent,
+    AddDayInvoiceDialogComponent,
+    CopyProductDialogComponent,
+    ConfirmDeprecateDialogComponent,
+    DeprecatedComponent,
+    BatchSummaryComponent
   ],
     imports: [
       HttpClientModule,

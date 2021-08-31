@@ -13,7 +13,7 @@ def get_deliveries(db: Session):
     return db.query(models.Delivery).all()
 
 
-def get_deliveries_by_product_id(product_id: int, db: Session):
+def get_deliveries_by_product_id(product_id: str, db: Session):
     return db.query(models.Delivery).filter(models.Delivery.product_id == product_id).all()
 
 

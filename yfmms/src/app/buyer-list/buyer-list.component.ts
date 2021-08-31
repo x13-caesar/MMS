@@ -8,6 +8,7 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 import {MatTableDataSource} from '@angular/material/table';
 import {environment} from '../../environments/environment';
 import {CreateBuyerDialogComponent} from './create-buyer-dialog/create-buyer-dialog.component';
+import {JWTTokenService} from '../shared/services/jwt-token.service';
 
 @Component({
   selector: 'app-buyer-list',
@@ -26,6 +27,7 @@ export class BuyerListComponent implements OnInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   constructor(
+    public jwtTokenService: JWTTokenService,
     private buyerService: BuyerService,
     public dialog: MatDialog,
     public _snackBar: MatSnackBar

@@ -16,7 +16,7 @@
         <td mat-cell *matCellDef="let element">
           <div *ngIf="!element.isEdit || !editableProperties.includes(col)">
             <div class="btn-edit" *ngIf="col ==='edit' ; spanHeader">
-              <button mat-icon-button (click)="element.isEdit = !element.isEdit"><mat-icon>edit</mat-icon></button>
+              <button mat-icon-button (click)="element.isEdit = !element.isEdit" [disabled]="jwtTokenService.getRole()==='employee'"><mat-icon>edit</mat-icon></button>
             </div>
             <span #spanHeader>
               {{element[col]}}
@@ -24,7 +24,7 @@
           </div>
           <div *ngIf="element.isEdit && editableProperties.includes(col)">
             <div class="btn-edit" *ngIf="col === 'edit'; else dataField">
-              <button mat-icon-button (click)="element.isEdit = !element.isEdit; onDeliverySubmit(element);"><mat-icon>done</mat-icon></button>
+              <button mat-icon-button (click)="element.isEdit = !element.isEdit; onDeliverySubmit(element);"><mat-icon>check</mat-icon></button>
             </div>
             <ng-template #dataField>
               <mat-form-field>

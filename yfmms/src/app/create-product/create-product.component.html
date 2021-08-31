@@ -1,14 +1,18 @@
 <div>
   <div class="sub-header">
-    <p class="mat-title">创建产品</p>
+    <p class="mat-title" *ngIf="editProductId; else createProdTemplate">编辑产品信息 - ID: {{editProductId}}</p>
+    <ng-template #createProdTemplate>
+      <p class="mat-title">创建产品</p>
+      <p class="mat-title promise piece" *ngIf="originProductId"> 拷贝的产品序列号为：{{originProductId}}</p>
+    </ng-template>
   </div>
   <div  class="body-container" fxLayout="row" fxLayoutAlign="space-around start">
     <mat-card class="new-product">
       <mat-card-header>
-        <mat-card-title> 新产品 </mat-card-title>
+        <mat-card-title> 产品信息 </mat-card-title>
       </mat-card-header>
       <mat-card-content>
-        <form fxLayout="column" fxLayoutAlign="space-around center" [formGroup]="productGroup" (ngSubmit)="onProductSubmit(productGroup)">
+        <form fxLayout="column" fxLayoutAlign="space-around center" [formGroup]="productGroup">
           <mat-form-field appearance="outline">
             <mat-label>产品序列号</mat-label>
             <input matInput formControlName="id">
@@ -37,13 +41,14 @@
           </mat-form-field>
 
           <mat-form-field appearance="outline">
+            <mat-label>定制客户</mat-label>
+            <input matInput type="text" formControlName="custom">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
             <mat-label>备注</mat-label>
             <textarea matInput formControlName="notice"></textarea>
           </mat-form-field>
-
-          <div class="button-container">
-            <button mat-raised-button color="accent" type="submit" [disabled]="!productGroup.valid">确认/更新产品信息</button>
-          </div>
         </form>
       </mat-card-content>
     </mat-card>
@@ -65,13 +70,18 @@
           </mat-form-field>
 
           <mat-form-field appearance="outline">
+            <mat-label>单件酬劳</mat-label>
+            <input type="number" step="0.01" matInput formControlName="unit_pay">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
             <mat-label>备注</mat-label>
             <textarea matInput formControlName="notice"></textarea>
           </mat-form-field>
 
           <mat-form-field appearance="outline">
             <mat-label>所需配件</mat-label>
-            <mat-chip-list #chipList aria-label="Fruit selection">
+            <mat-chip-list #chipList aria-label="compo selection">
               <mat-chip
                 *ngFor="let compo of composOfProcess"
                 [selectable]="selectable"
@@ -92,7 +102,7 @@
             </mat-chip-list>
             <mat-autocomplete #auto="matAutocomplete" [displayWith]="compoDisplayFn" (optionSelected)="selected($event)">
               <mat-option *ngFor="let compo of this.compoOptions | async" [value]="compo">
-                {{compo.name}} | {{compo.id}}
+                {{compo.name}} | {{compo.id}} | {{compo.description}}
               </mat-option>
             </mat-autocomplete>
           </mat-form-field>
@@ -109,7 +119,7 @@
         <mat-card-title> 提交信息预览</mat-card-title>
       </mat-card-header>
       <mat-card-content>
-        <div *ngIf="this.newProduct" fxLayout="column" fxLayoutAlign="space-around center">
+        <div *ngIf="this.newProduct" fxLayout="column" fxLayoutAlign="space-around start" class="super-isolated">
           <div fxLayout="column" fxLayoutAlign="start start" >
             <p class="info"> 产品序列号： {{this.newProduct.id}}</p>
             <p class="info"> 产品名称：{{this.newProduct.name}} </p>
@@ -117,7 +127,7 @@
             <p class="info"> 工艺：</p>
           </div>
           <mat-accordion class="process-list-display">
-            <mat-expansion-panel hideToggle *ngFor="let process of processOfProduct">
+            <mat-expansion-panel hideToggle *ngFor="let process of sortedProcessArray(processOfProduct)">
               <mat-expansion-panel-header>
                 <mat-panel-title>
                   {{process.process_name}}
@@ -130,15 +140,25 @@
                 <mat-chip-list aria-label="Fish selection">
                   <mat-chip color="accent" *ngFor="let pc of process.process_component">{{pc.component_name}} | {{pc.component_id}}</mat-chip>
                 </mat-chip-list>
-                <button mat-icon-button (click)="removeProcess(process)">
-                  删除该工艺
-                  <mat-icon>delete</mat-icon>
-                </button>
+                <div class="button-container">
+                  <button mat-icon-button (click)="editProcess(process)">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button mat-icon-button (click)="removeProcess(process)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
               </div>
             </mat-expansion-panel>
           </mat-accordion>
           <div class="button-container">
-            <button mat-raised-button class="action" (click)="onFinalSubmit()" [disabled]="!productGroup.valid">确认提交新产品</button>
+            <button mat-raised-button class="action"
+                    (click)="onConfirmEdit()"
+                    [disabled]="!productGroup.valid"
+                    *ngIf="this.editProductId; else createProdTemplate">提交编辑</button>
+            <ng-template #createProdTemplate>
+              <button mat-raised-button class="action" (click)="onFinalSubmit()" [disabled]="!productGroup.valid">确认提交</button>
+            </ng-template>
           </div>
         </div>
       </mat-card-content>

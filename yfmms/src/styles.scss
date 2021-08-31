@@ -79,8 +79,8 @@ img.scenario-small {
 }
 
 .body-container {
-  padding-left: 10%;
-  padding-right: 10%;
+  padding-left: 5%;
+  padding-right: 5%;
   margin-left: auto;
   margin-right: auto;
 }
@@ -129,9 +129,14 @@ img.scenario-small {
   transform: translate(-50%, -50%);
 }
 
+p.vertical-middle {
+  position: absolute;               /* 2 */
+  top: 50%;                         /* 3 */
+  transform: translate(-50%, -50%);   /* 4 */
+}
+
 p.highlight, b.highlight {
   color: var(--logoblue);
-  line-height: 2rem;
 }
 
 p.subtitle {
@@ -150,17 +155,41 @@ p.warn, b.warn {
   color: var(--warnred)
 }
 
+p.super-warn {
+  background-color: red;
+  color: white;
+}
+
 p.success, b.success {
-  color: green;
+  color: darkgreen;
 }
 
 p.record {
   color: midnightblue;
 }
 
+p.detail {
+  font-size: small;
+}
+
+p.promise {
+  color: #2980b9;
+}
+
 p.piece {
-  magin-left: 5px;
-  margin-right: 5px;
+  vertical-align: middle;
+  magin-left: 10px;
+  margin-right: 10px;
+}
+
+p.super-piece {
+  vertical-align: middle;
+  magin-left: 20px;
+  margin-right: 20px;
+}
+
+button.insert {
+  margin: 5px;
 }
 
 button.chip {
@@ -242,12 +271,26 @@ button.option:hover {
   border: 1px solid lightgrey;
 }
 
-div.distance {
+.distance {
   padding: 2%
+}
+
+.side-super-distance {
+  padding-left: 5%;
+  padding-right: 5%;
 }
 
 div.isolated {
   margin: 2%;
+}
+
+div.vertical-isolated {
+  margin-top: 2%;
+  margin-bottom: 2%;
+}
+
+div.super-isolated {
+  margin: 5%;
 }
 
 div.justify {

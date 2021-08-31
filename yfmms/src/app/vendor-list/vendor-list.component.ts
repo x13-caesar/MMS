@@ -9,7 +9,7 @@ import {environment} from '../../environments/environment';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
-import {FormControl} from '@angular/forms';
+import {FormControl, FormGroup} from '@angular/forms';
 import {JWTTokenService} from '../shared/services/jwt-token.service';
 
 @Component({
@@ -18,10 +18,14 @@ import {JWTTokenService} from '../shared/services/jwt-token.service';
   styleUrls: ['./vendor-list.component.scss']
 })
 export class VendorListComponent implements OnInit {
-  displayedColumns: string[] = [
-    'id', 'name', 'company', 'payment_period',
-    'contact', 'address', 'notice', 'edit', 'delete'
+  displayedProperties: string[] = [
+    'name', 'company', 'payment_period',
+    'contact', 'address', 'notice', 'edit'
   ];
+
+  displayedColumns = new Map([['name','联络人姓名'], ['address', '地址'],
+    ['company', '公司'], ['payment_period', '账期'], ['contact', '联系方式'], ['notice', '备注'],
+    ['edit', '操作']]);
 
   searchKeyword = new FormControl('')
   vendors: Vendor[] = [];
@@ -47,7 +51,7 @@ export class VendorListComponent implements OnInit {
     );
     this.searchKeyword.valueChanges.subscribe(
       kw => {
-        this.dataSource = new MatTableDataSource<Vendor>(this.vendorSearchFilter(kw));
+        this.dataSource = new MatTableDataSource<Vendor>(this.vendorService.vendorSearchFilter(this.vendors, kw));
         this.dataSource.paginator = this.paginator;
       })
   }
@@ -63,13 +67,6 @@ export class VendorListComponent implements OnInit {
         this.dataSource = new MatTableDataSource<Vendor>(this.vendors);
       }
     });
-  }
-
-  vendorSearchFilter(keyword: string): Vendor[] {
-    return keyword
-      ? this.vendors.filter(
-        vendor => vendor.company.includes(keyword) || vendor.name.includes(keyword) || (vendor.notice && vendor.notice.includes(keyword)))
-      : this.vendors
   }
 
   onVendorSubmit(vendor: Vendor): void {

@@ -9,6 +9,7 @@ import {MatTableDataSource} from '@angular/material/table';
 import {environment} from '../../environments/environment';
 import {CreateDeliveryDialogComponent} from './create-delivery-dialog/create-delivery-dialog.component';
 import {ProductService} from '../shared/services/product.service';
+import {JWTTokenService} from '../shared/services/jwt-token.service';
 
 @Component({
   selector: 'app-delivery',
@@ -35,6 +36,7 @@ export class DeliveryComponent implements OnInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   constructor(
+    public jwtTokenService: JWTTokenService,
     private deliveryService: DeliveryService,
     private productService: ProductService,
     public dialog: MatDialog,

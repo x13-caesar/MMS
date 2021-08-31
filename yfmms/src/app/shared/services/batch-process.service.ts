@@ -29,7 +29,7 @@ export class BatchProcessService {
     this.processService.getProcessesByProductId(batch.product_id).subscribe(
       processes => {
         processes.forEach(p => {
-          const bp: BatchProcess = {batch_id: Number(batch.id), process_id: Number(p.id), status: 'unstarted'};
+          const bp: BatchProcess = {unit_pay: p.unit_pay, batch_id: Number(batch.id), process_id: String(p.id), status: 'unstarted'};
           this.postBatchProcess(bp).subscribe(
             bp => bp_array.push(bp)
           )})
@@ -40,5 +40,9 @@ export class BatchProcessService {
 
   putBatchProcess(bp: BatchProcess): Observable<BatchProcess> {
     return this.http.put<BatchProcess>(`${environment.API_URL}/batch_process`, bp)
+  }
+
+  sortedBatchProcesses(bp_array: BatchProcess[]): BatchProcess[] {
+    return bp_array.sort((a, b) => (Number(a.process?.process_order) - Number(b.process?.process_order)))
   }
 }

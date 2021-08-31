@@ -1,9 +1,9 @@
 <div mat-dialog-title>
-  <p class="mat-h3">添加参与员工</p>
+  <p class="mat-h3">创建新生产批次</p>
 </div>
 
-<div mat-dialog-content>
-  <form [formGroup]="batchGroup">
+<div mat-dialog-content fxLayout="row" fxLayoutAlign="center none">
+  <form [formGroup]="batchGroup" fxLayout="column" fxLayoutAlign="space-around start">
     <mat-form-field appearance="outline">
       <mat-label>生产产品</mat-label>
       <input matInput formControlName="product_id" [matAutocomplete]="auto">

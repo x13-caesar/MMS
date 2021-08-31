@@ -23,7 +23,7 @@ def read_processes(db: Session = Depends(get_db)):
 
 
 @router.get("/{process_id}", response_model=schemas.Process)
-def read_process(process_id: int, db: Session = Depends(get_db)):
+def read_process(process_id: str, db: Session = Depends(get_db)):
     process = process_service.get_process(process_id=process_id, db=db)
     if process is None:
         raise HTTPException(status_code=404, detail="Process not found")
@@ -31,7 +31,7 @@ def read_process(process_id: int, db: Session = Depends(get_db)):
 
 
 @router.get("/product_id/{product_id}", response_model=List[schemas.Process])
-def read_processes_by_product_id(product_id: int, db: Session = Depends(get_db)):
+def read_processes_by_product_id(product_id: str, db: Session = Depends(get_db)):
     processes = process_service.get_processes_by_product_id(product_id=product_id, db=db)
     if not processes:
         raise HTTPException(status_code=404, detail="No process found")
@@ -64,7 +64,7 @@ def update_process(process: schemas.Process,
 
 
 @router.delete("/{process_id}")
-def delete_process(process_id: int, db: Session = Depends(get_db)):
+def delete_process(process_id: str, db: Session = Depends(get_db)):
     db_process_data = process_service.get_process(process_id, db=db)
     if not db_process_data:
         raise HTTPException(status_code=400, detail="Matching process not found")

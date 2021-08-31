@@ -37,7 +37,7 @@ export class EditWorkDialogComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.work_date.setValue(this.util.mysqlDatetimeParser(this.data.work.work_date));
+    this.work_date.setValue(this.data.work.work_date);
     this.plan_unit.setValue(this.data.work.plan_unit);
     this.data.work.work_specification?.forEach(
       ws => this.workSpecGroup.addControl(
@@ -46,6 +46,10 @@ export class EditWorkDialogComponent implements OnInit {
           ws.actual_amount,
           [Validators.required, Validators.min(0)]))
     );
+    this.plan_unit.valueChanges.subscribe(value => this.data.warehouse_record?.forEach(
+      wr => this.workSpecGroup.controls[wr.specification_id].setValidators(
+        [Validators.required, Validators.min(0), Validators.max(value * wr.consumption * 1.1)])
+    ));
   }
 
   onNoClick(): void {
@@ -54,7 +58,7 @@ export class EditWorkDialogComponent implements OnInit {
 
   onConfirmClick(): void {
     this.data.work.plan_unit = this.plan_unit.value;
-    this.data.work.work_date = this.util.mysqlDatetimeTransformer(this.work_date.value)
+    this.data.work.work_date = this.work_date.value;
     this.data.work.work_specification?.forEach(ws =>{
       ws.plan_amount = this.plan_unit.value;
       ws.actual_amount = this.workSpecGroup.controls[ws.specification_id].value;

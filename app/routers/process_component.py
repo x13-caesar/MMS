@@ -33,7 +33,7 @@ def read_process_component(process_component_id: int, db: Session = Depends(get_
 
 
 @router.get("/process_id/{process_id}")
-def read_process_components_by_process_id(process_id: int, db: Session = Depends(get_db)):
+def read_process_components_by_process_id(process_id: str, db: Session = Depends(get_db)):
     process_components = process_component_service.get_process_components_by_process_id(
         process_id=process_id,
         db=db)
@@ -53,7 +53,7 @@ def read_process_components_by_component_id(component_id: str, db: Session = Dep
 
 
 @router.get("/product_id/{product_id}")
-def read_process_components_by_product_id(product_id: int, db: Session = Depends(get_db)):
+def read_process_components_by_product_id(product_id: str, db: Session = Depends(get_db)):
     processes = process_service.get_processes_by_product_id(product_id=product_id, db=db)
     result = []
     for process in processes:

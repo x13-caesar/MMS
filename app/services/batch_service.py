@@ -33,11 +33,11 @@ def get_batches_by_status(status: str, db: Session):
     return db.query(Batch).filter(Batch.status == status).all()
 
 
-def get_batches_by_product_id(product_id: int, db: Session):
+def get_batches_by_product_id(product_id: str, db: Session):
     return db.query(Batch).filter(Batch.product_id == product_id).all()
 
 
-def get_batches_by_product_id_and_status(product_id: int, status: str, db: Session):
+def get_batches_by_product_id_and_status(product_id: str, status: str, db: Session):
     return db.query(Batch).filter(Batch.product_id == product_id,
                                          Batch.status == status).all()
 
@@ -70,6 +70,10 @@ def get_batches_start_before(date: datetime, db: Session):
     return db.query(Batch).filter(Batch.start <= date).all()
 
 
+def get_batches_end_after(date: datetime, db: Session):
+    return db.query(Batch).filter(Batch.end >= date).all()
+
+
 def get_batches_ship_after(date: datetime, db: Session):
     return db.query(Batch).filter(Batch.ship >= date).all()
 
@@ -91,7 +95,7 @@ def create_batch(batch: schemas.BatchCreate, db: Session):
 
 
 def update_batch(batch: schemas.Batch, db: Session):
-    updated_batch = Batch(**batch.dict())
+    updated_batch = Batch(**jsonable_encoder(batch))
     db.query(Batch). \
         filter(Batch.id == updated_batch.id). \
         update(jsonable_encoder(updated_batch))

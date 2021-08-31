@@ -4,7 +4,7 @@ from fastapi.encoders import jsonable_encoder
 from .. import models, schemas
 
 
-def get_process(process_id: int, db: Session):
+def get_process(process_id: str, db: Session):
     return db.query(models.Process).filter(models.Process.id == process_id).first()
 
 
@@ -16,7 +16,7 @@ def get_processes_by_name(name: str, db: Session):
     return db.query(models.Process).filter(models.Process.name == name).all()
 
 
-def get_processes_by_product_id(product_id: int, db: Session):
+def get_processes_by_product_id(product_id: str, db: Session):
     return db.query(models.Process).filter(models.Process.product_id == product_id).all()
 
 

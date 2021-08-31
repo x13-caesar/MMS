@@ -16,6 +16,7 @@ import {EmployeeService} from '../../shared/services/employee.service';
 
 class DialogData {
   bp!: BatchProcess;
+  batch_plan_unit!: number;
   employees!: Employee[];
   product_name!: string;
 }
@@ -37,7 +38,7 @@ export class CreateWorkDialogComponent implements OnInit {
   work_date = new FormControl(new Date(), Validators.required);
   plan_unit = new FormControl(
     '',
-    [Validators.required, Validators.max(this.data.bp.start_amount ?? 1000), Validators.min(1)]
+    [Validators.required, Validators.max(this.data.bp.start_amount ?? this.data.batch_plan_unit), Validators.min(1)]
   )
 
   constructor(
@@ -65,6 +66,10 @@ export class CreateWorkDialogComponent implements OnInit {
         )
       )
     );
+    this.plan_unit.valueChanges.subscribe(value => this.batchProcess.warehouse_record?.forEach(
+      wr => this.workSpecGroup.controls[wr.specification_id].setValidators(
+        [Validators.required, Validators.min(0), Validators.max(value * wr.consumption * 1.1)])
+    ));
   }
 
   onNoClick(): void {
@@ -96,7 +101,10 @@ export class CreateWorkDialogComponent implements OnInit {
               work_id: res_work.id,
               specification_id: wr.specification_id,
               plan_amount: this.plan_unit.value * wr.consumption,
-              actual_amount: this.workSpecGroup.controls[wr.specification_id].value
+              actual_amount: this.workSpecGroup.controls[wr.specification_id].value,
+              component_name: wr.component_name,
+              specification_gross_price: wr.specification_gross_price,
+              specification_net_price: wr.specification_net_price
             }
             this.wsService.postWorkSpecification(ws).subscribe(
               res_ws => {

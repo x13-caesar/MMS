@@ -47,4 +47,11 @@ export class EmployeeService {
   updateLastPayCheck(employee_id: number, last_pay_check: Date) {
     return this.http.put<Employee>(`${environment.API_URL}/employee/last_check_date`, {employee_id: employee_id, last_pay_check: last_pay_check})
   }
+
+  employeeSearchFilter(employees: Employee[], keyword: string): Employee[] {
+    keyword = keyword.toUpperCase();
+    return this.employees.filter(
+        employee => employee.name.toUpperCase().includes(keyword) || (employee.notice && employee.notice.toUpperCase().includes(keyword)));
+  }
+
 }

@@ -1,5 +1,5 @@
 <nav class="topnav">
-  <a>雍傅数字化生产管理系统</a>
+  <a routerLink="/overview">雍傅数字化生产管理系统</a>
   <a class="nav-link" routerLink="/overview" routerLinkActive="active">总览</a>
   <a class="nav-link" routerLink="/manufacture" routerLinkActive="active">生产</a>
 
@@ -12,10 +12,12 @@
   <a class="nav-link" routerLink="/salary" routerLinkActive="active">工资</a>
 
   <div fxLayout="row" fxLayoutAlign="end center" >
-    <p class="whiteout">欢迎，{{this.jwtTokenService.decodedToken.sub}}</p>
-    <button mat-stroked-button class="action navbar-login nav-link" *ngIf="!auth.user; else logoutTemplate" routerLink="/login" routerLinkActive="active"> 登陆 </button>
+    <div class="welcome-info-container">
+      <p class="whiteout vertical-middle" *ngIf="auth.user">欢迎，{{auth.user.username}}</p>
+    </div>
+    <button mat-raised-button color="primary" class="navbar-login nav-link" *ngIf="!auth.user; else logoutTemplate" routerLink="/login" routerLinkActive="active"> 登陆 </button>
     <ng-template #logoutTemplate>
-      <button mat-stroked-button class="action pointer navbar-login nav-link"> Logout </button>
+      <button mat-stroked-button class="action pointer navbar-login nav-link" (click)="onLogout()"> 退出 </button>
     </ng-template>
   </div>
 

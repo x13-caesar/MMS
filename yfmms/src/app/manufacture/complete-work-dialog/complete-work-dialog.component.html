@@ -3,12 +3,13 @@
 </div>
 
 <div mat-dialog-content>
-  <label id="example-radio-group-label">酬劳计算方式</label>
-  <mat-radio-group [formControl]="methodCtrl">
-    <mat-radio-button class="example-radio-button" *ngFor="let m of methods" [value]="m.method">
-      {{m.display}}
-    </mat-radio-button>
-  </mat-radio-group>
+<!--  <label id="example-radio-group-label">酬劳计算方式</label>-->
+<!--  <mat-radio-group [formControl]="methodCtrl">-->
+<!--    <mat-radio-button class="example-radio-button" *ngFor="let m of methods" [value]="m.method">-->
+<!--      {{m.display}}-->
+<!--    </mat-radio-button>-->
+<!--  </mat-radio-group>-->
+  <mat-slide-toggle [(ngModel)]="isByHour"> 计时工单 </mat-slide-toggle>
 
   <form [formGroup]="workCompleteGroup">
     <mat-form-field appearance="outline">
@@ -16,10 +17,10 @@
       <input type="number" matInput formControlName="complete_unit">
     </mat-form-field>
 
-    <mat-form-field appearance="outline" *ngIf="methodCtrl.value === 'complete_hour'">
+    <mat-form-field appearance="outline" *ngIf="isByHour">
       <mat-label>工作小时</mat-label>
-      <input type="number" matInput formControlName="complete_hour" [disabled]="methodCtrl.value === 'complete_unit'">
-      <mat-hint>只有按小时计酬时需要填写</mat-hint>
+      <input type="number" matInput formControlName="complete_hour">
+      <mat-hint>只有按小时计酬时需要填写，否则请留空</mat-hint>
     </mat-form-field>
   </form>
 

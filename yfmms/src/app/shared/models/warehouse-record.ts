@@ -4,5 +4,7 @@ export interface WarehouseRecord {
   component_id: string,
   specification_id: string,
   component_name: string,
-  consumption: number
+  consumption: number,
+  specification_net_price?: number,
+  specification_gross_price?: number
 }

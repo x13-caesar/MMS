@@ -13,8 +13,9 @@ import {CompoService} from '../shared/services/compo.service';
   styleUrls: ['./overview.component.scss']
 })
 export class OverviewComponent implements OnInit {
-  ongoing_batches!: Batch[]
-  plan_batches!: Batch[]
+  ongoing_batches!: Batch[];
+  plan_batches!: Batch[];
+  recent_finished_batches!: Batch[];
 
   compos: Compo[] = [];
   displayCompos: Compo[] = [];
@@ -27,28 +28,38 @@ export class OverviewComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.batchService.getBatchesByStatus('ongoing').subscribe(
-      batches => {
-        this.ongoing_batches = batches;
-        this.ongoing_batches.forEach(b => {
-          this.productService.getProductNameById(b.product_id).subscribe(
-            res => b.product_name = res.name
+    this.batchService.autoUpdateBatchStatus().subscribe(
+      res => {
+        if (res.success) {
+          this.batchService.getBatchesByStatus('ongoing').subscribe(
+            batches => {
+              this.ongoing_batches = batches;
+              this.ongoing_batches.forEach(b => {
+                this.productService.getProductNameById(b.product_id).subscribe(
+                  res => b.product_name = res.name
+                )})},
+            error => {console.log(error)}
           );
-        })
-      },
-      error => {console.log(error)}
-    );
-    this.batchService.getBatchesByStatus('unstarted').subscribe(
-      batches => {
-        this.plan_batches = batches;
-        this.plan_batches.forEach(b => {
-          this.productService.getProductNameById(b.product_id).subscribe(
-            res => b.product_name = res.name
-          );
-        })
-      },
-      error => {console.log(error)}
-    )
+          this.batchService.getBatchesByStatus('unstarted').subscribe(
+            batches => {
+              this.plan_batches = batches;
+              this.plan_batches.forEach(b => {
+                this.productService.getProductNameById(b.product_id).subscribe(
+                  res => b.product_name = res.name
+                );})},
+            error => {console.log(error)}
+            );
+        this.batchService.getRecentFinishedBatches().subscribe(
+          res => {
+            this.recent_finished_batches = res;
+            this.recent_finished_batches.forEach(b => {
+              this.productService.getProductNameById(b.product_id).subscribe(
+                res => b.product_name = res.name
+              );})
+          },
+          error => {console.log(error)}
+        )}
+      });
     this.compoService.getCompos().subscribe(
       res => {
         this.compos = res;

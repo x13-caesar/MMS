@@ -1,6 +1,6 @@
 export interface User {
   username: string;
-  hashed_pwd: string;
+  password: string;
   disabled: boolean;
   role: string;
 }

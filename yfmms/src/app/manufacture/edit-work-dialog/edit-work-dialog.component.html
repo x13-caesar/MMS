@@ -2,9 +2,9 @@
   <p class="mat-h3">编辑领料记录</p>
 </div>
 
-<div mat-dialog-content>
+<div mat-dialog-content fxLayout="column" fxLayoutAlign=" start" >
   <p>{{data.work.employee_name}}</p>
-  <form fxLayout="column" fxLayoutAlign="space-around center">
+  <form fxLayout="column" fxLayoutAlign="space-around start">
     <mat-form-field appearance="fill">
       <mat-label>领料日期</mat-label>
       <input matInput [matDatepicker]="picker" [formControl]="work_date">
@@ -19,16 +19,16 @@
     </mat-form-field>
 
     <mat-divider [inset]="true"></mat-divider>
-    <div [formGroup]="workSpecGroup">
-      <div *ngFor="let wr of data.warehouse_record" class="flex-container">
-        <p>配件：{{wr.specification_id}}</p>
-        <p>应领：{{plan_unit.value * wr.consumption}}</p>
+    <ul [formGroup]="workSpecGroup">
+      <li *ngFor="let wr of data.warehouse_record" fxLayout="row" fxLayoutAlign="start center" >
+        <p class="piece record">配件：{{wr.component_name}} | {{wr.specification_id}}</p>
+        <p class="piece">应领：{{plan_unit.value * wr.consumption}}</p>
         <mat-form-field appearance="outline">
           <mat-label>实领</mat-label>
           <input matInput [formControlName]="wr.specification_id">
         </mat-form-field>
-      </div>
-    </div>
+      </li>
+    </ul>
 
   </form>
 
@@ -36,6 +36,6 @@
 
 
 <div mat-dialog-actions>
-  <button mat-button (click)="onNoClick()">取消</button>
   <button mat-raised-button color="primary" (click)="onConfirmClick()">确认修改</button>
+  <button mat-button (click)="onNoClick()">取消</button>
 </div>

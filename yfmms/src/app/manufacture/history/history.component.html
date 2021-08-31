@@ -19,6 +19,7 @@
         <p class="mat-title highlight">批次：{{selectedBatch.id}}</p>
       </mat-card-header>
       <mat-card-content>
+        <button mat-button class="view" [routerLink]="['/batch-summary/', selectedBatch.id]">查看批次小结</button>
         <mat-accordion class="example-headers-align">
           <mat-expansion-panel
             [expanded]="step === (bp.process?.process_order || 1)"

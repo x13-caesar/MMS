@@ -70,24 +70,27 @@ class Buyer(Base):
 class Product(Base):
     __tablename__ = 'product'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(String, primary_key=True)
     name = Column(String)
     category = Column(String)
     description = Column(String)
-    last_produce = Column(DateTime)
     inventory = Column(Integer)
     picture = Column(String)
+    custom = Column(String)
     notice = Column(String)
+    deprecated = Column(Boolean)
+    deprecated_date = Column(DateTime)
 
 
 class Process(Base):
     __tablename__ = 'process'
 
-    id = Column(Integer, primary_key=True)
-    product_id = Column(Integer, ForeignKey('product.id'))
+    id = Column(String, primary_key=True)
+    product_id = Column(String, ForeignKey('product.id'))
     process_name = Column(String)
     process_order = Column(Integer)
     notice = Column(String)
+    unit_pay = Column(Float)
     process_component = relationship("ProcessComponent", backref="process")
 
 
@@ -100,7 +103,7 @@ class ProcessComponent(Base):
     __tablename__ = 'process_component'
 
     id = Column(Integer, primary_key=True)
-    process_id = Column(Integer, ForeignKey('process.id'))
+    process_id = Column(String, ForeignKey('process.id'))
     component_id = Column(String, ForeignKey('component.id'))
     attrition_rate = Column(Float)
     consumption = Column(Integer)
@@ -112,7 +115,7 @@ class Batch(Base):
 
     id = Column(Integer, primary_key=True)
     status = Column(String)
-    product_id = Column(Integer, ForeignKey('product.id'))
+    product_id = Column(String, ForeignKey('product.id'))
     plan_amount = Column(Integer)
     actual_amount = Column(Integer)
     create = Column(DateTime)
@@ -127,10 +130,11 @@ class BatchProcess(Base):
 
     id = Column(Integer, primary_key=True)
     status = Column(String)
-    process_id = Column(Integer, ForeignKey('process.id'))
+    process_id = Column(String, ForeignKey('process.id'))
     batch_id = Column(Integer, ForeignKey('batch.id'))
     start_amount = Column(Integer)
     end_amount = Column(Integer)
+    unit_pay = Column(Float)
     warehouse_record = relationship("WarehouseRecord", backref="batch_process")
     process = relationship("Process", backref="batch_process")
 
@@ -147,7 +151,7 @@ class Delivery(Base):
     __tablename__ = 'delivery'
 
     id = Column(Integer, primary_key=True)
-    product_id = Column(Integer, ForeignKey('product.id'))
+    product_id = Column(String, ForeignKey('product.id'))
     amount = Column(Integer)
     order_id = Column(String)
     buyer_id = Column(Integer, ForeignKey('buyer.id'))
@@ -245,16 +249,14 @@ class WorkSpecification(Base):
     specification_id = Column(String, ForeignKey('specification.id'))
     plan_amount = Column(Integer)
     actual_amount = Column(Integer)
-    specification = relationship("Specification", back_populates="work_specification")
+    component_name = Column(String)
+    specification_net_price = Column(Float)
+    specification_gross_price = Column(Float)
 
 
 Work.work_specification = relationship("WorkSpecification",
                                        order_by=WorkSpecification.id,
                                        backref="work")
-
-Specification.work_specification = relationship("WorkSpecification",
-                                               order_by=WorkSpecification.id,
-                                               back_populates="specification")
 
 
 class User(Base):
@@ -275,3 +277,5 @@ class WarehouseRecord(Base):
     specification_id = Column(String, ForeignKey('specification.id'))
     component_name = Column(String, ForeignKey('component.name'))
     consumption = Column(Integer)
+    specification_net_price = Column(Float)
+    specification_gross_price = Column(Float)

@@ -11,11 +11,11 @@ export class ProcessService {
 
   constructor(private http: HttpClient) { }
 
-  getProcessesByProductId(product_id: number): Observable<Process[]> {
+  getProcessesByProductId(product_id: string): Observable<Process[]> {
     return this.http.get<Process[]>(`${environment.API_URL}/process/product_id/${product_id}`)
   }
 
-  getProcessById(id: number): Observable<Process> {
+  getProcessById(id: string): Observable<Process> {
     return this.http.get<Process>(`${environment.API_URL}/process/${id}`)
   }
 }

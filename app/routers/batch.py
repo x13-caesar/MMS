@@ -9,7 +9,7 @@ from fastapi import HTTPException
 
 from ..dependencies import get_db
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from enum import Enum
 
 router = APIRouter(
@@ -22,6 +22,7 @@ router = APIRouter(
 class BatchStatus(str, Enum):
     unstarted = "unstarted"
     ongoing = "ongoing"
+    urgent = "urgent"
     finished = "finished"
     shipped = "shipped"
     cancelled = "cancelled"
@@ -42,8 +43,19 @@ def read_batches_meta_info(db: Session = Depends(get_db)):
 @router.get("/unfinished", response_model=List[schemas.Batch])
 def read_unfinished_batches(db: Session = Depends(get_db)):
     ongoing_batches = batch_service.get_batches_by_status('ongoing', db=db)
+    print(ongoing_batches)
+    urgent_batches = batch_service.get_batches_by_status('urgent', db=db)
+    print(urgent_batches)
     unstarted_batches = batch_service.get_batches_by_status('unstarted', db=db)
-    return ongoing_batches + unstarted_batches
+    print(unstarted_batches)
+    return ongoing_batches + urgent_batches + unstarted_batches
+
+
+@router.get("/working", response_model=List[schemas.Batch])
+def read_working_batches(db: Session = Depends(get_db)):
+    ongoing_batches = batch_service.get_batches_by_status('ongoing', db=db)
+    urgent_batches = batch_service.get_batches_by_status('urgent', db=db)
+    return ongoing_batches + urgent_batches
 
 
 @router.get("/collected", response_model=List[schemas.Batch])
@@ -51,6 +63,14 @@ def read_collected_batches(db: Session = Depends(get_db)):
     finished_batches = batch_service.get_batches_by_status('finished', db=db)
     shipped_batches = batch_service.get_batches_by_status('shipped', db=db)
     return finished_batches + shipped_batches
+
+
+@router.get("/recent", response_model=List[schemas.Batch])
+def read_recent_ended_batches(db: Session = Depends(get_db)):
+    tod = datetime.now()
+    week = timedelta(days=7)
+    target = tod - week
+    return batch_service.get_batches_end_after(target, db=db)
 
 
 @router.get("/{batch_id}", response_model=schemas.Batch)
@@ -70,7 +90,7 @@ def read_batch_meta_info(batch_id: int, db: Session = Depends(get_db)):
 
 
 @router.get("/product_id/{product_id}/{status}")
-def read_batches_by_product_id_and_status(product_id: int, status: BatchStatus, db: Session = Depends(get_db)):
+def read_batches_by_product_id_and_status(product_id: str, status: BatchStatus, db: Session = Depends(get_db)):
     if not status:
         batches = batch_service.get_batches_by_product_id(product_id=product_id,
                                                           db=db)
@@ -154,6 +174,26 @@ def update_batch(batch: schemas.Batch,
     update_data = batch.dict(exclude_unset=True)
     updated_batch = db_batch_model.copy(update=update_data)
     return batch_service.update_batch(batch=updated_batch, db=db)
+
+
+@router.put("/auto_update_status")
+def auto_update_status(db: Session = Depends(get_db)):
+    current = datetime.now()
+    unstarted_batches = batch_service.get_batches_by_status('unstarted', db=db)
+    for b in unstarted_batches:
+        if (b.start <= current):
+            b.status = 'ongoing'
+            batch_service.update_batch(b, db=db)
+    return JSONResponse(content={"success": True})
+
+
+@router.put("/complete/{batch_id}/{actual_amount}")
+def auto_update_status(batch_id: int, actual_amount: int, db: Session = Depends(get_db)):
+    target_batch = batch_service.get_batch(batch_id, db=db)
+    target_batch.status = 'finished'
+    target_batch.actual_amount = actual_amount
+    target_batch.end = datetime.now()
+    return batch_service.update_batch(batch=target_batch, db=db)
 
 
 @router.delete("/{batch_id}")

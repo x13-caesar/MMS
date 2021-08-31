@@ -91,7 +91,7 @@ class Buyer(BuyerBase):
 
 class ProcessComponentBase(BaseModel):
     id: Optional[int]
-    process_id: Optional[int]
+    process_id: Optional[str]
     component_id: str
     attrition_rate: float = 0.001
     consumption: int = 1
@@ -109,11 +109,12 @@ class ProcessComponent(ProcessComponentBase):
 
 
 class ProcessBase(BaseModel):
-    id: Optional[int]
+    id: Optional[str]
     process_name: str
-    product_id: Optional[int]
+    product_id: Optional[str]
     process_order: int
     notice: Optional[str]
+    unit_pay: float
     process_component: Optional[List[ProcessComponent]]
 
 
@@ -128,14 +129,16 @@ class Process(ProcessBase):
 
 
 class ProductBase(BaseModel):
-    id: int
+    id: str
     name: str
     category: str
     description: Optional[str]
-    last_produce: Optional[datetime]
     inventory: int
     picture: Optional[str]
+    custom: Optional[str]
     notice: Optional[str]
+    deprecated: bool = False
+    deprecated_date: Optional[datetime]
     process: Optional[List[Process]]
 
 
@@ -154,6 +157,8 @@ class WarehouseRecordBase(BaseModel):
     component_name: str
     specification_id: Optional[str]
     consumption: int = 1
+    specification_net_price: float
+    specification_gross_price: float
 
 
 class WarehouseRecordCreate(WarehouseRecordBase):
@@ -172,6 +177,9 @@ class WorkSpecificationBase(BaseModel):
     specification_id: str
     plan_amount: int
     actual_amount: int = 0
+    component_name: str
+    specification_net_price: Optional[float]
+    specification_gross_price: Optional[float]
 
 
 class WorkSpecificationCreate(WorkSpecificationBase):
@@ -215,10 +223,11 @@ class Work(WorkBase):
 
 class BatchProcessBase(BaseModel):
     status: str
-    process_id: int
+    process_id: str
     batch_id: int
     start_amount: Optional[int]
     end_amount: Optional[int]
+    unit_pay: float
 
 
 class BatchProcessCreate(BatchProcessBase):
@@ -237,7 +246,7 @@ class BatchProcess(BatchProcessBase):
 
 class BatchBase(BaseModel):
     status: str
-    product_id: int
+    product_id: str
     plan_amount: int
     actual_amount: Optional[int]
     create: datetime
@@ -260,7 +269,7 @@ class Batch(BatchBase):
 
 
 class DeliveryBase(BaseModel):
-    product_id: int
+    product_id: str
     amount: int
     order_id: Optional[str]
     buyer_id: int

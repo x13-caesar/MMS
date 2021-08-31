@@ -18,10 +18,10 @@ export class AuthorizeGuard implements CanActivate {
   canActivate(
     next: ActivatedRouteSnapshot,
     state: RouterStateSnapshot): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
-    if (this.jwtService.getUser() && this.jwtService.isTokenExpired()) {
+    if (this.jwtService.getUser() && !this.jwtService.isTokenExpired()) {
         return true;
-    } else {
-      return this.router.navigateByUrl('/login');
     }
+    this.router.navigateByUrl('/login');
+    return false
   }
 }

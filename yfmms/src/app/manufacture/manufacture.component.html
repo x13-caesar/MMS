@@ -1,7 +1,8 @@
 <div class="body-container" fxLayout="column" fxLayoutAlign="space-between center">
   <div class="button-container fullfill">
-    <button mat-button class="call" (click)="openCreateBatchDialog()"> 创建新生产批次 </button>
+    <button mat-button class="call" (click)="openCreateBatchDialog()" [disabled]="jwtTokenService.getRole()==='employee'"> 创建新生产批次 </button>
     <button mat-button class="view" routerLink="/history"> 历史生产批次 </button>
+    <button mat-button class="call" (click)="openAddDayInvoiceDialog()"> 添加日产记录 </button>
   </div>
 
   <div fxLayout="row" fxLayoutAlign="space-between start" class="fullfill">
@@ -11,8 +12,12 @@
       </mat-card-header>
       <mat-card-content>
         <mat-selection-list #unfinished [multiple]="false" (selectionChange)="onBatchChange(unfinished.selectedOptions.selected)">
-          <mat-list-option *ngFor="let batch of displayedBatches" [value]="batch">
-            {{batch.product_name}} | {{batch.plan_amount}}件 | 排产：{{batch.start | date:"YYYY/MM/dd" }}
+          <mat-list-option *ngFor="let batch of displayedBatches"
+                           [value]="batch"
+                           [disabled]="jwtTokenService.getRole()==='employee'">
+            <p [attr.class]="batchTitleClass.get(batch.status)">
+              {{batch.product_name}} | {{batch.plan_amount}}件 | 排产：{{batch.start | date:"YYYY/MM/dd" }}
+            </p>
           </mat-list-option>
         </mat-selection-list>
       </mat-card-content>
@@ -34,7 +39,7 @@
                 工艺{{bp.process.process_order}} - {{bp.process.process_name}}
               </mat-panel-title>
               <mat-panel-description>
-                状态：{{bp.status}}
+                状态：{{statusMap.get(bp.status)}}
               </mat-panel-description>
             </mat-expansion-panel-header>
 
@@ -52,7 +57,9 @@
                         <mat-label> 选择具体使用规格 </mat-label>
                         <mat-select [formControlName]="pc.component.id || ''">
                           <mat-option *ngFor="let spec of pc.component.specification" [value]="spec">
-                            {{spec.id}} | {{spec.vendor?.company}}
+                            <p [attr.class]="(spec.stock > (pc.consumption * (bp.start_amount || 0))) ? 'piece' : 'piece warn'">
+                              {{spec.id}} | {{spec.vendor?.company}}（库存{{spec.stock}}件）
+                            </p>
                           </mat-option>
                         </mat-select>
                       </mat-form-field>
@@ -79,33 +86,45 @@
               <div class="greyborder distance work" *ngIf="!bp.work || bp.work.length === 0"> <p>无领料记录</p> </div>
               <div *ngIf="!!bp.work">
                 <div *ngFor="let work of bp.work" class="greyborder distance work">
-                  <p class="mat-h4 record"> {{work.employee_name}} ({{work.employee_id}}) | 计划{{work.plan_unit}}件 | 领料于{{work.work_date | date:"YYYY/MM/dd"}}</p>
+                  <div class="flex-container">
+                    <p class="mat-h4 record super-piece"> {{work.employee_name}} (工号{{work.employee_id}}) </p>
+                    <p class="mat-h4 record super-piece">计划{{work.plan_unit}}件</p>
+                    <p class="mat-h4 record super-piece">已产{{work.complete_unit}}件</p>
+                    <p class="mat-h4 record super-piece">领料于{{work.work_date | date:"YYYY/MM/dd"}}</p>
+                  </div>
                   <p *ngFor="let ws of work.work_specification">
                     {{ws.specification_id}} 实领 {{ws.actual_amount}} (应领：{{ws.plan_amount}})
                   </p>
                   <div class="flex-container">
                     <button mat-raised-button color="accent"
                             [disabled]="!bp.warehouse_record"
-                            (click)="openEditWorkDialog(work, bp.warehouse_record || [], bp.start_amount || 0);rerenderBatch(selectedBatch.id)" *ngIf="!work.complete_unit">
+                            (click)="openEditWorkDialog(work, bp.warehouse_record || [], bp.start_amount || 0);rerenderBatch(selectedBatch.id)"
+                            *ngIf="work.complete_unit < work.plan_unit">
                       编辑该工人领料</button>
-                    <button mat-raised-button color="primary"
-                            (click)="openCompleteWorkDialog(work)"
-                            *ngIf="!work.complete_unit">
-                      标记完成</button>
-                    <button mat-button color="primary" *ngIf="!!work.complete_unit" disabled>已完成</button>
+<!--                    <button mat-raised-button color="primary"-->
+<!--                            (click)="openCompleteWorkDialog(work)"-->
+<!--                            *ngIf="!work.complete_unit">-->
+<!--                      标记完成</button>-->
+                    <button mat-button color="primary" *ngIf="work.complete_unit >= work.plan_unit" disabled>已全额完成</button>
                   </div>
+                  <p class="detail warn" *ngIf="(work.complete_unit > 0) && (work.complete_unit < work.plan_unit)">已有相关日产单，编辑领料时请注意已完成的数量</p>
                 </div>
               </div>
               <div class="flex-container">
                 <button mat-raised-button
                         color="accent"
                         (click)="openCreateWorkDialog(bp, selectedBatch.product_name || '')"
-                        [disabled]="!(!bp.process?.process_component || !!bp.warehouse_record)">添加参与工人</button>
+                        [disabled]="bp.status !== 'ongoing' || ((bp.warehouse_record?.length === 0 ) && (bp.process?.process_component!.length > 0))">
+                  添加参与工人</button>
                 <button mat-raised-button
                         color="primary"
                         (click)="completeBatchProcess(bp)"
                         [disabled]="!checkAllWorkDone(bp.work || [])"
                         *ngIf="bp.status === 'ongoing'">确认工艺完成</button>
+                <button mat-raised-button
+                        color="warn"
+                        (click)="forceCompleteBatchProcess(bp)"
+                        *ngIf="bp.status === 'ongoing'">强制确认完成</button>
                 <button mat-raised-button
                         color="primary"
                         *ngIf="bp.status === 'finished'" disabled>工艺已完成</button>
@@ -124,7 +143,8 @@
         </mat-accordion>
 
         <div class="button-container" fxLayout="row" fxLayoutAlign="end center">
-          <button mat-raised-button [disabled]="checkAllBatchProcessDone(selectedBatch.batch_process)" (click)="completeBatch(selectedBatch)">确认批次完工</button>
+          <button mat-raised-button color="warn" class="insert" *ngIf="selectedBatch.status !== 'urgent'" (click)="setBatchUrgent(selectedBatch)">加急该批次</button>
+          <button mat-raised-button color="primary" class="insert"  [disabled]="!checkAllBatchProcessDone(selectedBatch.batch_process)" (click)="completeBatch(selectedBatch)">确认批次完工</button>
         </div>
 
       </mat-card-content>

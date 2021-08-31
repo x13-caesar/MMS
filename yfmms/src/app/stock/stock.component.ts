@@ -15,11 +15,12 @@ import {CreateVendorDialogComponent} from '../vendor-list/create-vendor-dialog/c
 import {environment} from '../../environments/environment';
 import {Vendor} from '../shared/models/vendor';
 import {MatDialog} from '@angular/material/dialog';
-import {MatSnackBar} from '@angular/material/snack-bar';
+import {MatSnackBar, MatSnackBarModule} from '@angular/material/snack-bar';
 import {EditComponentDialogComponent} from './edit-component-dialog/edit-component-dialog.component';
 import {DeleteComponentDialogComponent} from './delete-component-dialog/delete-component-dialog.component';
 import {Spec} from '../shared/models/spec';
 import {EditSpecDialogComponent} from './edit-spec-dialog/edit-spec-dialog.component';
+import {JWTTokenService} from '../shared/services/jwt-token.service';
 
 
 @Component({
@@ -35,14 +36,20 @@ import {EditSpecDialogComponent} from './edit-spec-dialog/edit-spec-dialog.compo
   ],
 })
 export class StockComponent implements OnInit, AfterViewInit {
-  displayedColumns: string[] = [
-    'id', 'name', 'category', 'material', 'description', 'warn_stock', 'edit', 'delete'
+  displayedProperties: string[] = [
+    'id', 'name', 'category', 'material', 'description', 'warn_stock', 'edit'
   ];
+
+  displayedColumns = new Map([['id', '配件编码'], ['name','配件名称'],
+    ['category', '分类'], ['description', '描述'], ['material', '材料'], ['warn_stock', '警示库存'],
+    ['edit', '操作']]);
 
   compos: Compo[] = [];
   displayCompos: Compo[] = [];
   dataSource: any;
   expandedElement!: Compo | null;
+
+  dangerousCompos: Compo[] = [];
 
   filterGroup!: FormGroup;
 
@@ -55,7 +62,8 @@ export class StockComponent implements OnInit, AfterViewInit {
     private compoService: CompoService,
     private formBuilder: FormBuilder,
     public dialog: MatDialog,
-    public _snackBar: MatSnackBar
+    public _snackBar: MatSnackBar,
+    public jwtTokenService: JWTTokenService
   ) { }
 
   ngOnInit(): void {
@@ -63,37 +71,27 @@ export class StockComponent implements OnInit, AfterViewInit {
       res => {
         this.compos = res;
         this.displayCompos = this.compos;
+        this.dangerousCompos = this.compos.filter(compo => Number(compo.specification?.reduce((acc, spec) => acc + spec.stock, 0)) < compo.warn_stock);
         this.materials = res.map(compo => compo.material).filter((v, idx, arr) => !!v && arr.indexOf(v) === idx);
         this.categories = res.map(compo => compo.category).filter((v, idx, arr) => !!v && arr.indexOf(v) === idx);
         this.dataSource = new MatTableDataSource<Compo>(this.displayCompos);
         this.dataSource.paginator = this.paginator;
       }
-    )
+    );
     this.filterGroup = this.formBuilder.group({
       keyword: new FormControl(''),
       material: new FormControl(null),
       category: new FormControl(null)
-    })
+    });
     this.filterGroup.valueChanges.subscribe(
       changes => {
-        this.displayCompos = this.compoSearchFilter(changes)
+        this.displayCompos = this.compoService.compoSearchFilter(this.compos, changes);
         this.dataSource = new MatTableDataSource<Compo>(this.displayCompos);
       }
-    )
+    );
   }
 
   ngAfterViewInit() {
-    this.dataSource.paginator = this.paginator;
-  }
-
-  compoSearchFilter(changes: any): Compo[] {
-    return this.compos
-      .filter(compo => !changes.category || (compo.category === changes.category))
-      .filter(compo => !changes.material || (compo.material === changes.material))
-      .filter(compo => compo.id?.includes(changes.keyword)
-        || compo.name.includes(changes.keyword)
-        || compo.description?.includes(changes.keyword)
-        || (compo.notice && compo.notice.includes(changes.keyword)))
   }
 
   emptyFilter(): void {
@@ -145,7 +143,7 @@ export class StockComponent implements OnInit, AfterViewInit {
 
   openEditSpecDialog(spec: Spec, compo_name: string): void {
     const dialogRef = this.dialog.open(EditSpecDialogComponent, {
-      width: environment.LARGE_DIALOG_WIDTH,
+      width: environment.SMALL_DIALOG_WIDTH,
       data: {spec: spec, compo_name: compo_name}
     });
 

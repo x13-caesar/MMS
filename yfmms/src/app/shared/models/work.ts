@@ -5,7 +5,7 @@ export interface Work {
   batch_process_id: number,
   employee_id: number,
   employee_name: string,
-  work_date: string,
+  work_date: Date,
   plan_unit: number,
   unit_pay: number,
   complete_unit: number,
@@ -15,6 +15,10 @@ export interface Work {
   product_name: string,
   process_name: string,
   check: boolean,
-  salary_id?: number
+  salary_id?: number,
+  // for report
+  actual_unit_spec_cost?: number,
+  actual_total_spec_cost?: number;
+  actual_unit_overall_cost?: number
 }
 

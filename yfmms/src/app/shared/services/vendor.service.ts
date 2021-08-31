@@ -31,4 +31,14 @@ export class VendorService {
   deleteVendor(vendor_id: number): Observable<PostResponse> {
     return this.http.delete<PostResponse>(`${environment.API_URL}/vendors/${String(vendor_id)}`)
   }
+
+  vendorSearchFilter(vendors: Vendor[], keyword: string): Vendor[] {
+    keyword = keyword.toUpperCase();
+    return vendors.filter(
+        vendor => vendor.company?.toUpperCase().includes(keyword)
+          || vendor.name?.toUpperCase().includes(keyword)
+          || vendor.address?.toUpperCase().includes(keyword)
+          || vendor.notice?.toUpperCase().includes(keyword));
+  }
+
 }

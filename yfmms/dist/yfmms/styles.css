@@ -143,14 +143,20 @@ p.super-warn {
   color: white;
 }
 p.success, b.success {
-  color: green;
+  color: darkgreen;
 }
 p.record {
   color: midnightblue;
 }
+p.promise {
+  color: #2980b9;
+}
 p.piece {
-  magin-left: 5px;
-  margin-right: 5px;
+  magin-left: 10px;
+  margin-right: 10px;
+}
+button.insert {
+  margin: 5px;
 }
 button.chip {
   margin: 5px;
@@ -222,6 +228,9 @@ div.distance {
 }
 div.isolated {
   margin: 2%;
+}
+div.super-isolated {
+  margin: 5%;
 }
 div.justify {
   display: flex;

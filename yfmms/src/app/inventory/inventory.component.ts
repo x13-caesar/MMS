@@ -13,6 +13,9 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 import {FormBuilder, FormControl, FormGroup} from '@angular/forms';
 import {Compo} from '../shared/models/compo';
 import {EditProductDialogComponent} from './edit-product-dialog/edit-product-dialog.component';
+import {JWTTokenService} from '../shared/services/jwt-token.service';
+import {CopyProductDialogComponent} from './copy-product-dialog/copy-product-dialog.component';
+import {ConfirmDeprecateDialogComponent} from './confirm-deprecate-dialog/confirm-deprecate-dialog.component';
 
 @Component({
   selector: 'app-inventory',
@@ -21,11 +24,15 @@ import {EditProductDialogComponent} from './edit-product-dialog/edit-product-dia
 })
 export class InventoryComponent implements OnInit {
 
-  displayedColumns: string[] = [
+  displayedProperties: string[] = [
     'id', 'name', 'category', 'description',
-    'last_produce', 'inventory', 'picture', 'notice',
-    'edit', 'delivery'
+    'inventory', 'custom', 'notice',
+    'edit'
   ];
+
+  displayedColumns = new Map([['id', '产品编码'], ['name','产品名称'],
+    ['category', '分类'], ['description', '描述'], ['inventory', '库存'], ['custom', '定制客户'], ['notice', '备注'],
+    ['edit', '操作']]);
 
   products: Product[] = []
   displayProducts: Product[] = []
@@ -37,6 +44,7 @@ export class InventoryComponent implements OnInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   constructor(
+    public jwtTokenService: JWTTokenService,
     private productService: ProductService,
     public dialog: MatDialog,
     private formBuilder: FormBuilder,
@@ -44,7 +52,7 @@ export class InventoryComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.productService.getProducts().subscribe(
+    this.productService.getValidProducts().subscribe(
       res => {
         this.products = res;
         this.displayProducts = this.products;
@@ -61,21 +69,11 @@ export class InventoryComponent implements OnInit {
     })
     this.filterGroup.valueChanges.subscribe(
       changes => {
-        this.displayProducts = this.productSearchFilter(changes)
+        this.displayProducts = this.productService.productSearchFilter(this.products, changes)
         this.dataSource = new MatTableDataSource<Product>(this.displayProducts);
       }
     )
   }
-
-  productSearchFilter(changes: any): Product[] {
-    return this.products
-      .filter(prod => !changes.category || (prod.category === changes.category))
-      .filter(prod => String(prod.id).includes(changes.keyword)
-        || prod.name.includes(changes.keyword)
-        || prod.description?.includes(changes.keyword)
-        || (prod.notice && prod.notice.includes(changes.keyword)))
-  }
-
 
   emptyFilter(): void {
     this.filterGroup.reset()
@@ -96,7 +94,7 @@ export class InventoryComponent implements OnInit {
 
   openEditProductDialog(product: Product) {
     const dialogRef = this.dialog.open(EditProductDialogComponent, {
-      width: environment.SMALL_DIALOG_WIDTH,
+      width: environment.LARGE_DIALOG_WIDTH,
       data: {product: product}
     });
 
@@ -114,5 +112,46 @@ export class InventoryComponent implements OnInit {
 
   onSuccess(eventString: string): void {
     this._snackBar.open(`${eventString}成功`, "关闭");
+  }
+
+  onFailure(eventString: string): void {
+    this._snackBar.open(`${eventString}失败`, "关闭");
+  }
+
+
+  openCopyProductDialog(product: Product) {
+    const dialogRef = this.dialog.open(CopyProductDialogComponent, {
+      width: '30%',
+      height: '30%',
+      data: {product: product}
+    });
+    dialogRef.afterClosed().subscribe(
+      res => {
+        if (res) {
+          this.products.push(res);
+          this.displayProducts.push(res)
+          this.dataSource = new MatTableDataSource<Product>(this.displayProducts);
+          this.onSuccess('复制')
+        }})}
+
+
+  openDeprecateConfirmDialog(product: Product) {
+    const dialogRef = this.dialog.open(ConfirmDeprecateDialogComponent, {
+      width: '30%',
+      height: '30%',
+      data: {product: product}
+    });
+    dialogRef.afterClosed().subscribe(
+      res => {
+        if (res.success === 'success') {
+          const target_idx1 = this.displayProducts.findIndex(p => p.id === product.id);
+          this.displayProducts = this.displayProducts.splice(target_idx1, 1);
+          const target_idx2 = this.products.findIndex(p => p.id === product.id);
+          this.products = this.products.splice(target_idx2, 1);
+          this.dataSource = new MatTableDataSource<Product>(this.displayProducts);
+          this.onSuccess('停用');
+        }
+      }
+    )
   }
 }

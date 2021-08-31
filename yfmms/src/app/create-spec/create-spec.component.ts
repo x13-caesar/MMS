@@ -56,9 +56,9 @@ export class CreateSpecComponent implements OnInit {
 
     this.specGroup = this.formBuilder.group({
       id: new FormControl('', Validators.required),
-      gross_price: new FormControl(''),
-      net_price: new FormControl(''),
-      stock: new FormControl(0),
+      gross_price: new FormControl('', [Validators.required, Validators.min(0)]),
+      net_price: new FormControl('', [Validators.required, Validators.min(0)]),
+      stock: new FormControl(0, Validators.min(0)),
       blueprint: new FormControl(''),
       notice: new FormControl('')
     });

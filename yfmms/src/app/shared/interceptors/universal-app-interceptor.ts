@@ -3,7 +3,9 @@ import { HttpInterceptor, HttpHandler, HttpRequest } from '@angular/common/http'
 import {AuthService} from '../services/auth.service';
 import {JWTTokenService} from '../services/jwt-token.service';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class UniversalAppInterceptor implements HttpInterceptor {
 
   constructor( private authService: AuthService,

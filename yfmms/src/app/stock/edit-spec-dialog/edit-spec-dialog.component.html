@@ -16,7 +16,7 @@
       <mat-hint align="end">请遵循既定编码规则</mat-hint>
     </mat-form-field>
 
-    <div class="nty-percent-fill" fxLayout="row" fxLayoutAlign="space-between none">
+    <div fxLayout="row" fxLayoutAlign="space-between none" *ngIf="jwtTokenService.getRole()==='omni'">
       <mat-form-field appearance="outline">
         <mat-label>税前价格</mat-label>
         <input matInput type="number" formControlName="net_price">
@@ -40,7 +40,7 @@
     </mat-form-field>
 
     <div class="button-container">
-      <button type="submit" [disabled]="!specGroup.valid">确认添加</button>
+      <button mat-raised-button color="primary" type="submit" [disabled]="!specGroup.valid">确认添加</button>
     </div>
   </form>
 </div>

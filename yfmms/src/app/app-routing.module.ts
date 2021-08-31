@@ -4,7 +4,6 @@ import {OverviewComponent} from './overview/overview.component';
 import {InventoryComponent} from './inventory/inventory.component';
 import {StockComponent} from './stock/stock.component';
 import {ManufactureComponent} from './manufacture/manufacture.component';
-import {HrComponent} from './hr/hr.component';
 import {AuthorizeGuard} from './auth.guard';
 import {AppComponent} from './app.component';
 import {LoginComponent} from './login/login.component';
@@ -18,6 +17,9 @@ import {EmployeeComponent} from './employee/employee.component';
 import {DeliveryComponent} from './delivery/delivery.component';
 import {BuyerListComponent} from './buyer-list/buyer-list.component';
 import {SalaryComponent} from './salary/salary.component';
+import {AdminGuard} from './admin.guard';
+import {DeprecatedComponent} from './inventory/deprecated/deprecated.component';
+import {BatchSummaryComponent} from './manufacture/batch-summary/batch-summary.component';
 
 const routes: Routes = [
   {
@@ -25,59 +27,54 @@ const routes: Routes = [
     component: AppComponent,
     canActivate: [AuthorizeGuard]
   },
-  {
-    path: 'overview',
-    component: OverviewComponent
-  },
-  {
-    path: 'inventory',
-    component: InventoryComponent
-  },
-  {
-    path: 'stock',
-    component: StockComponent
-  },
-  { path: 'manufacture', component: ManufactureComponent },
-  { path: 'manufacture/:batch_id', component: ManufactureComponent },
+  { path: 'overview', component: OverviewComponent, canActivate: [AuthorizeGuard] },
+  { path: 'inventory', component: InventoryComponent, canActivate: [AuthorizeGuard] },
+  { path: 'stock', component: StockComponent, canActivate: [AuthorizeGuard] },
+  { path: 'manufacture', component: ManufactureComponent, canActivate: [AuthorizeGuard] },
+  { path: 'manufacture/:batch_id', component: ManufactureComponent, canActivate: [AuthorizeGuard] },
+  { path: 'batch-summary/:bid', component: BatchSummaryComponent, canActivate: [AuthorizeGuard] },
   {
     path: 'history',
-    component: HistoryComponent
+    component: HistoryComponent,
+    canActivate: [AuthorizeGuard]
   },
-  { path: 'employee', component: EmployeeComponent },
-  { path: 'salary', component: SalaryComponent},
+  { path: 'employee', component: EmployeeComponent, canActivate: [AuthorizeGuard, AdminGuard] },
+  { path: 'salary', component: SalaryComponent, canActivate: [AuthorizeGuard, AdminGuard]},
   {
     path: 'delivery',
-    component: DeliveryComponent
+    component: DeliveryComponent,
+    canActivate: [AuthorizeGuard]
   },
   {
     path: 'buyer',
-    component: BuyerListComponent
-  },
-  {
-    path: 'hr',
-    component: HrComponent
+    component: BuyerListComponent,
+    canActivate: [AuthorizeGuard]
   },
   {
     path: 'vendors',
-    component: VendorListComponent
+    component: VendorListComponent,
+    canActivate: [AuthorizeGuard]
   },
   {
     path: 'login',
     component: LoginComponent
   },
-  {
-    path: 'create-product',
-    component: CreateProductComponent
-  },
+  { path: 'create-product', component: CreateProductComponent, canActivate: [AuthorizeGuard] },
+  { path: 'edit-product/:pid', component: CreateProductComponent, canActivate: [AuthorizeGuard] },
+  { path: 'copy-product/:origin_id/:new_id', component: CreateProductComponent, canActivate: [AuthorizeGuard] },
+  { path: 'deprecated', component: DeprecatedComponent, canActivate: [AuthorizeGuard] },
   {
     path: 'create-employee',
-    component: CreateEmployeeComponent
+    component: CreateEmployeeComponent,
+    canActivate: [AuthorizeGuard]
   },
   {
     path: 'create-spec',
-    component: CreateSpecComponent
+    component: CreateSpecComponent,
+    canActivate: [AuthorizeGuard]
   },
-  {path: 'transmission/:error', component: TransmissionComponent}
+  {path: 'transmission/:error', component: TransmissionComponent},
+  { path: '',   redirectTo: '/overview', pathMatch: 'full'}
 ];
 
 @NgModule({

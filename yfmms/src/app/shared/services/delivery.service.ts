@@ -31,4 +31,10 @@ export class DeliveryService {
   putDelivery(delivery: Delivery): Observable<Delivery> {
     return this.http.put<Delivery>(`${this.target_controller}`, delivery);
   }
+
+  deliverySearchFilter(deliveries: Delivery[], keyword: string): Delivery[] {
+    keyword = keyword.toUpperCase();
+    return deliveries.filter(
+        d => d.buyer?.name.toUpperCase().includes(keyword) || d.buyer?.company.toUpperCase().includes(keyword) || d.product_name?.toUpperCase().includes(keyword))
+  }
 }

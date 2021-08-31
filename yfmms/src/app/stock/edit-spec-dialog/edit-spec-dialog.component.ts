@@ -6,6 +6,7 @@ import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {SpecService} from '../../shared/services/spec.service';
 import {Spec} from '../../shared/models/spec';
 import {MatSnackBar} from '@angular/material/snack-bar';
+import {JWTTokenService} from '../../shared/services/jwt-token.service';
 
 class DialogData {
   spec!: Spec;
@@ -30,14 +31,15 @@ export class EditSpecDialogComponent implements OnInit {
     @Inject(MAT_DIALOG_DATA) public data: DialogData,
     private specService: SpecService,
     private formBuilder: FormBuilder,
-    private _snackBar: MatSnackBar
+    private _snackBar: MatSnackBar,
+    public jwtTokenService: JWTTokenService
   ) { }
 
   ngOnInit(): void {
     this.specGroup = this.formBuilder.group({
       id: new FormControl('', Validators.required),
-      gross_price: new FormControl('', Validators.required),
-      net_price: new FormControl('', Validators.required),
+      gross_price: new FormControl(''),
+      net_price: new FormControl(''),
       stock: new FormControl(0, Validators.required),
       notice: new FormControl(''),
     });

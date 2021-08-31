@@ -18,11 +18,19 @@ export class ProductService {
     return this.http.get<Product[]>(`${environment.API_URL}/products`)
   }
 
-  getProductNameById(id: number): Observable<any> {
+  getValidProducts(): Observable<Product[]> {
+    return this.http.get<Product[]>(`${environment.API_URL}/products/valid`)
+  }
+
+  getInvalidProducts(): Observable<Product[]> {
+    return this.http.get<Product[]>(`${environment.API_URL}/products/invalid`)
+  }
+
+  getProductNameById(id: string): Observable<any> {
     return this.http.get<any>(`${environment.API_URL}/products/only_name/${id}`)
   }
 
-  getProductById(product_id: number): Observable<Product> {
+  getProductById(product_id: string): Observable<Product> {
     return this.http.get<Product>(`${environment.API_URL}/products/${product_id}`)
   }
 
@@ -38,19 +46,19 @@ export class ProductService {
     return this.http.get<Product[]>(`${environment.API_URL}/products/inventory_under/${inventory}`)
   }
 
-  postProduct(product: Product): Observable<PostResponse> {
-    return this.http.post<PostResponse>(`${environment.API_URL}/products`, product)
+  postProduct(product: Product): Observable<Product> {
+    return this.http.post<Product>(`${environment.API_URL}/products`, product)
   }
 
   putProduct(product: Product): Observable<Product> {
     return this.http.put<Product>(`${environment.API_URL}/products`, product)
   }
 
-  adjustProductInventory(product_id: number, adjust: number): Observable<Product> {
+  adjustProductInventory(product_id: string, adjust: number): Observable<Product> {
     return this.http.put<Product>(`${environment.API_URL}/products/adjust_inventory/${product_id}/${adjust}`, null)
   }
 
-  deleteProduct(product_id: number): Observable<PostResponse> {
+  deleteProduct(product_id: string): Observable<PostResponse> {
     return this.http.delete<PostResponse>(`${environment.API_URL}/products/${product_id}`)
   }
 
@@ -60,5 +68,25 @@ export class ProductService {
 
   productAutocompleteFilter(input: string, products: Product[]) {
     return products.filter(p => p.name.includes(input) || String(p.id).includes(input));
+  }
+
+  productSearchFilter(products: Product[], changes: any): Product[] {
+    changes.category && (changes.category = changes.category.toUpperCase());
+    changes.keyword && (changes.keyword = changes.keyword.toUpperCase());
+    return products
+      .filter(prod => !changes.category || (prod.category === changes.category))
+      .filter(prod => String(prod.id).toUpperCase().includes(changes.keyword)
+        || prod.name.toUpperCase().includes(changes.keyword)
+        || prod.description?.toUpperCase().includes(changes.keyword)
+        || (prod.notice && prod.notice.toUpperCase().includes(changes.keyword)))
+  }
+
+  deprecateProduct(product_id: string): Observable<PostResponse> {
+    const now = (new Date()).toISOString();
+    return this.http.put<PostResponse>(`${environment.API_URL}/products/deprecate/${product_id}/${now}`, null);
+  }
+
+  resumeProduct(product_id: string): Observable<PostResponse> {
+    return this.http.put<PostResponse>(`${environment.API_URL}/products/resume/${product_id}`, null);
   }
 }

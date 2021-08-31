@@ -22,6 +22,7 @@ import {MatSnackBarModule} from '@angular/material/snack-bar';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import {MatChipsModule} from '@angular/material/chips';
+import {MatButtonToggleModule} from '@angular/material/button-toggle';
 
 @NgModule({
   imports: [
@@ -47,7 +48,8 @@ import {MatChipsModule} from '@angular/material/chips';
     MatSnackBarModule,
     MatFormFieldModule,
     MatCheckboxModule,
-    MatChipsModule
+    MatChipsModule,
+    MatButtonToggleModule
   ],
   exports: [
     MatButtonModule,
@@ -72,7 +74,8 @@ import {MatChipsModule} from '@angular/material/chips';
     MatSnackBarModule,
     MatFormFieldModule,
     MatCheckboxModule,
-    MatChipsModule
+    MatChipsModule,
+    MatButtonToggleModule
   ]
 })
 

@@ -33,7 +33,7 @@ def read_batch_process(batch_process_id: int, db: Session = Depends(get_db)):
 
 
 @router.get("/process_id/{process_id}")
-def read_batch_processes_by_process_id(process_id: int, db: Session = Depends(get_db)):
+def read_batch_processes_by_process_id(process_id: str, db: Session = Depends(get_db)):
     batch_processes = batch_process_service.get_batch_processes_by_process_id(
         process_id=process_id,
         db=db)
@@ -53,7 +53,7 @@ def read_batch_processes_by_status(status: str, db: Session = Depends(get_db)):
 
 
 @router.get("/product_id/{product_id}/{batch_status}")
-def read_batch_processes_by_product_id_and_batch_status(product_id: int, batch_status: str, db: Session = Depends(get_db)):
+def read_batch_processes_by_product_id_and_batch_status(product_id: str, batch_status: str, db: Session = Depends(get_db)):
     batches = batch_service.get_batches_by_product_id_and_status(product_id=product_id,
                                                                  status=batch_status,
                                                                  db=db)

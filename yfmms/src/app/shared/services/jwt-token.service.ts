@@ -1,15 +1,20 @@
 import { Injectable } from '@angular/core';
 import jwt_decode from 'jwt-decode';
+import {AuthService} from './auth.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class JWTTokenService {
 
-  jwtToken = '';
+  jwtToken: string = '';
   decodedToken: { [key: string]: string } = {};
 
-  constructor() {
+  constructor(
+    public auth: AuthService
+  ) {
+    this.jwtToken = localStorage.getItem('token') || '';
+    this.decodeToken();
   }
 
   setToken(token: string): void {
@@ -21,6 +26,10 @@ export class JWTTokenService {
   decodeToken(): void {
     if (this.jwtToken) {
       this.decodedToken = jwt_decode(this.jwtToken);
+      this.auth.user = {
+        username: this.decodedToken.sub,
+        role: this.decodedToken.role
+      }
     }
   }
 
@@ -30,7 +39,12 @@ export class JWTTokenService {
 
   getUser(): any {
     this.decodeToken();
-    return this.decodedToken ? this.decodedToken.displayname : null;
+    return this.decodedToken ? this.decodedToken.sub : null;
+  }
+
+  getRole(): any {
+    this.decodeToken();
+    return this.decodedToken ? this.decodedToken.role : null;
   }
 
   getExpiryTime(): any {
@@ -45,5 +59,10 @@ export class JWTTokenService {
     } else {
       return false;
     }
+  }
+
+  clearAll() {
+    this.jwtToken = '';
+    this.decodedToken = {};
   }
 }

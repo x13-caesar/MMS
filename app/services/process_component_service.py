@@ -12,7 +12,7 @@ def get_process_components(db: Session):
     return db.query(models.ProcessComponent).all()
 
 
-def get_process_components_by_process_id(process_id: int, db: Session):
+def get_process_components_by_process_id(process_id: str, db: Session):
     return db.query(models.ProcessComponent).filter(models.ProcessComponent.process_id == process_id).all()
 
 

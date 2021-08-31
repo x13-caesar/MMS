@@ -55,7 +55,7 @@ def read_salaries_of_month(month: datetime, db: Session = Depends(get_db)):
     return operations
 
 
-@router.get("/month_range/{after}/{before")
+@router.get("/month_range/{after}/{before}")
 def read_salaries_of_month(after: datetime, before: datetime, db: Session = Depends(get_db)):
     operations = salary_service.get_salaries_in_month_range(after=after, before=before, db=db)
     if not operations:

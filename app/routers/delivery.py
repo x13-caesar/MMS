@@ -32,7 +32,7 @@ def read_delivery(delivery_id: int, db: Session = Depends(get_db)):
 
 
 @router.get("/product_id/{product_id}")
-def read_deliveries_by_product_id(product_id: int, db: Session = Depends(get_db)):
+def read_deliveries_by_product_id(product_id: str, db: Session = Depends(get_db)):
     deliveries = delivery_service.get_deliveries_by_product_id(product_id=product_id, db=db)
     if not deliveries:
         raise HTTPException(status_code=404, detail="No delivery found")

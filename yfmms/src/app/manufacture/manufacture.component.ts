@@ -23,6 +23,8 @@ import {CompoService} from '../shared/services/compo.service';
 import {UtilService} from '../shared/util.service';
 import {SpecService} from '../shared/services/spec.service';
 import {ActivatedRoute} from '@angular/router';
+import {JWTTokenService} from '../shared/services/jwt-token.service';
+import {AddDayInvoiceDialogComponent} from './add-day-invoice-dialog/add-day-invoice-dialog.component';
 
 @Component({
   selector: 'app-manufacture',
@@ -37,11 +39,15 @@ export class ManufactureComponent implements OnInit {
   selectedBatchProcess!: BatchProcess;
 
   step = 1;
+  batchTitleClass = new Map([['ongoing', 'success'], ['urgent', 'warn'], ['unstarted', 'promise']])
+  statusMap = new Map([['ongoing', '生产中'], ['urgent', '加急'], ['unstarted', '未开始'], ['finished', '已完成']])
+
 
   specChoiceGroup!: FormGroup;
   workingEmployees: Employee[] = [];
 
   constructor(
+    public jwtTokenService: JWTTokenService,
     private batchService: BatchService,
     private formBuilder: FormBuilder,
     private employeeService: EmployeeService,
@@ -55,25 +61,27 @@ export class ManufactureComponent implements OnInit {
     private wrService: WarehouseRecordService,
     private compoService: CompoService,
     private util: UtilService
-  ) { }
+  ) {
+  }
 
   ngOnInit(): void {
     this.displayId = String(this.route.snapshot.paramMap.get('batch_id'));
-    console.log(this.displayId)
-    this.batchService.getUnfinishedBatches().subscribe(
-      res => {
-        this.displayedBatches = res;
-        this.displayedBatches.forEach(b => {
-          this.productService.getProductNameById(b.product_id).subscribe(
-            res => b.product_name = res.name,
-            error => console.log(error)
-          );
-          if (String(b.id) === String(this.displayId)) {
-            this.selectedBatch = b;
-          }
-        });
-      },
-      error => console.log(error)
+    this.batchService.autoUpdateBatchStatus().subscribe(
+      res => res.success && this.batchService.getUnfinishedBatches().subscribe(
+        res => {
+          this.displayedBatches = res;
+          this.displayedBatches.forEach(b => {
+            this.productService.getProductNameById(b.product_id).subscribe(
+              res => b.product_name = res.name,
+              error => console.log(error)
+            );
+            if (String(b.id) === String(this.displayId)) {
+              this.selectedBatch = b;
+            }
+          })
+        },
+        error => console.log(error)
+      )
     );
     this.employeeService.getEmployeesByStatus('working').subscribe(
       res => this.workingEmployees = res,
@@ -85,7 +93,7 @@ export class ManufactureComponent implements OnInit {
   onBatchChange(options: MatListOption[]) {
     // map these MatListOptions to their values
     this.selectedBatch = options[0].value;
-    this.step = this.selectedBatch.batch_process.find(bp => bp.status === 'ongoing')?.process?.process_order || 1;
+    this.step = this.selectedBatch.batch_process.find(bp => bp.status === 'ongoing' || bp.status === 'unstarted')?.process?.process_order || 1;
     this.specChoiceGroup = new FormGroup({});
   }
 
@@ -117,7 +125,9 @@ export class ManufactureComponent implements OnInit {
         component_id: pc.component_id,
         component_name: pc.component?.name || '',
         consumption: pc.consumption || 1,
-        specification_id: this.specChoiceGroup.controls[pc.component_id].value.id
+        specification_id: this.specChoiceGroup.controls[pc.component_id].value.id,
+        specification_net_price: this.specChoiceGroup.controls[pc.component_id].value.net_price,
+        specification_gross_price: this.specChoiceGroup.controls[pc.component_id].value.gross_price
       };
       this.wrService.postWarehouseRecord(wr).subscribe(
         res => bp.warehouse_record?.push(res),
@@ -135,6 +145,8 @@ export class ManufactureComponent implements OnInit {
     const new_wr_array: WarehouseRecord[] = [];
     bp.warehouse_record?.forEach(wr => {
       wr.specification_id = this.specChoiceGroup.controls[wr.component_id].value.id;
+      wr.specification_net_price = this.specChoiceGroup.controls[wr.component_id].value.net_price;
+      wr.specification_gross_price = this.specChoiceGroup.controls[wr.component_id].value.gross_price;
       this.wrService.putWarehouseRecord(wr).subscribe(
         res => new_wr_array.push(res),
         error => {
@@ -164,12 +176,13 @@ export class ManufactureComponent implements OnInit {
   openCreateWorkDialog(bp: BatchProcess, product_name: string): void {
     const dialogRef = this.dialog.open(CreateWorkDialogComponent, {
       width: environment.MEDIAN_DIALOG_WIDTH,
-      data: {bp: bp, employees: this.workingEmployees, product_name: product_name}
+      data: {bp: bp, batch_plan_unit: this.selectedBatch.plan_amount, employees: this.workingEmployees, product_name: product_name}
     });
-
     dialogRef.afterClosed().subscribe(
       new_work => {
-        this.rerenderBatch(bp.batch_id);
+        if (new_work) {
+          this.rerenderBatch(bp.batch_id);
+        }
       }
     );
   }
@@ -206,27 +219,33 @@ export class ManufactureComponent implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe(
-      updated_work => this.workService.putWork(updated_work).subscribe(
-        res => {
-          this.rerenderBatch(Number(this.selectedBatch.id));
-          this.onSuccess('确认完成');
-        },
-        error => {
-          console.log(error);
-          this.onFailure('确认完成');
-          return work;
-        }) && updated_work
+      updated_work => {
+        if (updated_work) {
+          this.workService.putWork(updated_work).subscribe(
+            res => {
+              this.rerenderBatch(Number(this.selectedBatch.id));
+              this.onSuccess('确认完成');
+            },
+            error => {
+              console.log(error);
+              this.onFailure('确认完成');
+              return work;
+            })
+        }
+      }
     );
   }
 
   openCreateBatchDialog(): void {
     const dialogRef = this.dialog.open(CreateBatchDialogComponent, {
-      width: environment.MEDIAN_DIALOG_WIDTH
+      width: environment.SMALL_DIALOG_WIDTH
     });
     dialogRef.afterClosed().subscribe(
       new_batch => {
-        this.displayedBatches.push(new_batch);
-        this.onSuccess('创建生产批次');
+        if (new_batch) {
+          this.displayedBatches.push(new_batch);
+          this.onSuccess('创建生产批次');
+        }
       }
     )
   }
@@ -240,7 +259,7 @@ export class ManufactureComponent implements OnInit {
   }
 
   checkAllWorkDone(works: Work[]): boolean {
-    return !!works.length && works.every(w => w.complete_unit && w.complete_unit > 0)
+    return !!(works.length && works.every(w => w.complete_unit && w.complete_unit > 0))
   }
 
   checkAllBatchProcessDone(bps: BatchProcess[]): boolean {
@@ -266,13 +285,35 @@ export class ManufactureComponent implements OnInit {
     )
   }
 
+  forceCompleteBatchProcess(bp: BatchProcess) {
+    const complete_bp = {...bp}
+    // @ts-ignore
+    complete_bp.end_amount = complete_bp.start_amount;
+    complete_bp.status = 'finished';
+    this.bpService.putBatchProcess(complete_bp).subscribe(
+      res => {
+        this.rerenderBatch(complete_bp.batch_id);
+        this.onSuccess('强制确认');
+      },
+      error => {
+        this.onFailure('强制确认');
+        console.log(error)
+      }
+    )
+  }
+
   completeBatch(batch: Batch): void {
     const updated_batch = {...batch}
-    updated_batch.actual_amount = batch.batch_process[batch.batch_process.length - 1].end_amount
+    updated_batch.id = updated_batch.id || 0
+    updated_batch.actual_amount = batch.batch_process[batch.batch_process.length - 1].end_amount || 0
     updated_batch.status = 'finished';
     updated_batch.end = this.util.mysqlDatetimeTransformer(new Date());
-    this.batchService.putBatch(updated_batch).subscribe(
+    this.batchService.completeBatch(updated_batch.id, updated_batch.actual_amount).subscribe(
       res => {
+        // delete from display
+        const targetIdx = this.displayedBatches.findIndex(b => b.id === res.id);
+        this.displayedBatches = this.displayedBatches.splice(targetIdx, 1);
+        // product inventory adjustment
         this.productService.adjustProductInventory(batch.product_id, Number(batch.actual_amount)).subscribe()
         this.onSuccess(`批次${res.id}完工确认`);
       },
@@ -290,7 +331,8 @@ export class ManufactureComponent implements OnInit {
     if (current_order === 1) {
       updated_bp.start_amount = batch.plan_amount;
     } else {
-      updated_bp.start_amount = batch.batch_process.find(bp => bp.process?.process_order === (Number(current_order) - 1))?.end_amount;
+      const last_bp = batch.batch_process.find(bp => bp.process?.process_order === (Number(current_order) - 1))!;
+      updated_bp.start_amount = last_bp.end_amount || last_bp.start_amount;
     }
     this.bpService.putBatchProcess(updated_bp).subscribe(
       res => {
@@ -318,4 +360,30 @@ export class ManufactureComponent implements OnInit {
     return bp_array.sort((a, b) => (Number(a.process?.process_order) - Number(b.process?.process_order)))
   }
 
+  openAddDayInvoiceDialog() {
+    const workingBatches = this.displayedBatches.filter(b => (b.status !== 'unstarted'));
+    const dialogRef = this.dialog.open(AddDayInvoiceDialogComponent, {
+      width: environment.MEDIAN_DIALOG_WIDTH,
+      data: {workingBatches: workingBatches}
+    });
+    dialogRef.afterClosed().subscribe(
+    );
+  }
+
+  setBatchUrgent(selectedBatch: Batch) {
+    this.batchService.putBatch({...selectedBatch, status: 'urgent'}).subscribe(
+      res => {
+        this.rerenderBatch(res.id!);
+        this.onSuccess('加急')
+      },
+      error => {
+        this.onFailure('加急')
+        console.log(error)
+      }
+    )
+  }
+
+  print(element: any) {
+    console.log(element);
+  }
 }

@@ -17,20 +17,20 @@ import {Salary} from '../shared/models/salary';
   styleUrls: ['./employee.component.scss']
 })
 export class EmployeeComponent implements OnInit, AfterViewInit{
-  displayedColumns: string[] = [
+  displayedProperties: string[] = [
     'id', 'name', 'gender', 'phone',
     'ssn', 'department', 'notice', 'edit'
   ];
+
+  displayedColumns = new Map([['id', '工号'], ['name','姓名'],
+    ['gender', '性别'], ['phone', '联系电话'], ['ssn', '身份证号'], ['department', '部门'], ['notice', '备注'],
+    ['edit', '操作']]);
 
   searchKeyword = new FormControl('')
   employees: Employee[] = [];
   dataSource: any;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
-
-  ngAfterViewInit() {
-    this.dataSource.paginator = this.paginator;
-  }
 
   constructor(
     private employeeService: EmployeeService,
@@ -50,16 +50,17 @@ export class EmployeeComponent implements OnInit, AfterViewInit{
     );
     this.searchKeyword.valueChanges.subscribe(
       kw => {
-        this.dataSource = new MatTableDataSource<Employee>(this.employeeSearchFilter(kw));
+        this.dataSource = new MatTableDataSource<Employee>(this.employeeService.employeeSearchFilter(this.employees, kw));
         this.dataSource.paginator = this.paginator;
       })
   }
+
+  ngAfterViewInit() {}
 
   openCreateEmployeeDialog(): void {
     const dialogRef = this.dialog.open(CreateEmployeeDialogComponent, {
       width: environment.SMALL_DIALOG_WIDTH
     });
-
     dialogRef.afterClosed().subscribe(new_employee => {
       if (new_employee) {
         this.employees.push(new_employee);
@@ -67,13 +68,6 @@ export class EmployeeComponent implements OnInit, AfterViewInit{
       }
 
     });
-  }
-
-  employeeSearchFilter(keyword: string): Employee[] {
-    return keyword
-      ? this.employees.filter(
-        employee => employee.name.includes(keyword) || (employee.notice && employee.notice.includes(keyword)))
-      : this.employees
   }
 
   onEmployeeSubmit(employee: Employee): void {
@@ -102,7 +96,6 @@ export class EmployeeComponent implements OnInit, AfterViewInit{
       width: environment.MEDIAN_DIALOG_WIDTH,
       data: {employees: this.employees, target_employee: emp, start_date: start_date, end_date: end_date}
     });
-
     dialogRef.afterClosed().subscribe(
       ret_salary => {
         if (ret_salary) {

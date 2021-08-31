@@ -17,4 +17,8 @@ export class HeaderComponent implements OnInit {
   ngOnInit(): void {
   }
 
+  onLogout() {
+    this.auth.logout();
+    this.jwtTokenService.clearAll();
+  }
 }

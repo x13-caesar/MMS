@@ -2,7 +2,7 @@ import {Buyer} from './buyer';
 
 export interface Delivery {
   id?: number,
-  product_id: number,
+  product_id: string,
   amount: number,
   order_id?: string,
   buyer_id: number,
