@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
-
 from .routers import vendor, specification, component, batch, batch_process, buyer, delivery, employee, operation, \
     process, process_component, product, salary, work, work_specification, warehouse_record, user
 from .security import token

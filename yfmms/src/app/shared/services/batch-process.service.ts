@@ -28,7 +28,7 @@ export class BatchProcessService {
     const bp_array: BatchProcess[] = []
     this.processService.getProcessesByProductId(batch.product_id).subscribe(
       processes => {
-        processes.forEach(p => {
+      this.processService.sortedProcesses(processes).forEach(p => {
           const bp: BatchProcess = {unit_pay: p.unit_pay, batch_id: Number(batch.id), process_id: String(p.id), status: 'unstarted'};
           this.postBatchProcess(bp).subscribe(
             bp => bp_array.push(bp)
@@ -44,5 +44,13 @@ export class BatchProcessService {
 
   sortedBatchProcesses(bp_array: BatchProcess[]): BatchProcess[] {
     return bp_array.sort((a, b) => (Number(a.process?.process_order) - Number(b.process?.process_order)))
+  }
+
+  batchProcessAutocompleteFilter(bps: BatchProcess[], input: string): BatchProcess[] {
+    return bps.filter(bp => bp.process?.process_name.includes(input) || String(bp.process?.process_order).startsWith(input));
+  }
+
+  batchProcessDisplayFn(bp: BatchProcess) {
+    return bp ? `${bp.process?.process_order} - ${bp.process?.process_name}` : ''
   }
 }

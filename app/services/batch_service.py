@@ -22,6 +22,12 @@ def get_batches(db: Session):
     return db.query(Batch).all()
 
 
+def get_batches_in_month(year: int, month: int, db: Session):
+    lower_bound = ((year-2000)*100 + month) * 100
+    upper_bound = lower_bound + 100
+    return db.query(Batch).filter(Batch.id > lower_bound, Batch.id < upper_bound).all()
+
+
 def get_batches_meta_info(db: Session):
     return db.query(Batch.id, Batch.status, Batch.product_id,
                     Batch.plan_amount, Batch.actual_amount,
@@ -95,7 +101,9 @@ def create_batch(batch: schemas.BatchCreate, db: Session):
 
 
 def update_batch(batch: schemas.Batch, db: Session):
-    updated_batch = Batch(**jsonable_encoder(batch))
+    json_batch = jsonable_encoder(batch)
+    json_batch.pop('batch_process', None)
+    updated_batch = Batch(**json_batch)
     db.query(Batch). \
         filter(Batch.id == updated_batch.id). \
         update(jsonable_encoder(updated_batch))

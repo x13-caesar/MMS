@@ -94,7 +94,7 @@ export class ManufactureComponent implements OnInit {
     // map these MatListOptions to their values
     this.selectedBatch = options[0].value;
     this.step = this.selectedBatch.batch_process.find(bp => bp.status === 'ongoing' || bp.status === 'unstarted')?.process?.process_order || 1;
-    this.specChoiceGroup = new FormGroup({});
+    // this.specChoiceGroup = new FormGroup({});
   }
 
   updateSpecChoiceGroup(bp: BatchProcess): void {
@@ -129,6 +129,7 @@ export class ManufactureComponent implements OnInit {
         specification_net_price: this.specChoiceGroup.controls[pc.component_id].value.net_price,
         specification_gross_price: this.specChoiceGroup.controls[pc.component_id].value.gross_price
       };
+      console.log(wr);
       this.wrService.postWarehouseRecord(wr).subscribe(
         res => bp.warehouse_record?.push(res),
         error => {
@@ -266,8 +267,7 @@ export class ManufactureComponent implements OnInit {
     return bps.every(bp => bp.status === 'finished');
   }
 
-  completeBatchProcess(bp: BatchProcess): void {
-    const complete_bp = {...bp}
+  completeBatchProcess(complete_bp: BatchProcess): void {
     // @ts-ignore
     complete_bp.end_amount = complete_bp.work?.reduce((acc, w) => {
       return acc + Number(w.complete_unit);
@@ -275,26 +275,47 @@ export class ManufactureComponent implements OnInit {
     complete_bp.status = 'finished';
     this.bpService.putBatchProcess(complete_bp).subscribe(
       res => {
-        this.rerenderBatch(complete_bp.batch_id);
-        this.onSuccess('修改工艺状态');
+        const next_bp = this.selectedBatch.batch_process.find(
+          bp => bp.process?.process_order === (complete_bp.process?.process_order! + 1));
+        if (next_bp) {
+          next_bp.start_amount = complete_bp.end_amount;
+          this.bpService.putBatchProcess(next_bp).subscribe(
+            new_next_bp => {
+              this.rerenderBatch(complete_bp.batch_id);
+              this.onSuccess('确认工艺完成');
+            }
+          );
+        } else {
+          this.rerenderBatch(complete_bp.batch_id);
+          this.onSuccess('确认工艺完成');
+        }
       },
       error => {
-        this.onFailure('修改工艺状态');
+        this.onFailure('确认工艺完成');
         console.log(error)
       }
     )
   }
 
-  forceCompleteBatchProcess(bp: BatchProcess) {
-    const complete_bp = {...bp}
+  forceCompleteBatchProcess(complete_bp: BatchProcess) {
     // @ts-ignore
     complete_bp.end_amount = complete_bp.start_amount;
     complete_bp.status = 'finished';
     this.bpService.putBatchProcess(complete_bp).subscribe(
       res => {
-        this.rerenderBatch(complete_bp.batch_id);
-        this.onSuccess('强制确认');
-      },
+        const next_bp = this.selectedBatch.batch_process.find(
+          bp => bp.process?.process_order === (complete_bp.process?.process_order! + 1));
+        if (next_bp) {
+          next_bp.start_amount = complete_bp.end_amount;
+          this.bpService.putBatchProcess(next_bp).subscribe(
+            new_next_bp => {
+              this.rerenderBatch(complete_bp.batch_id);
+              this.onSuccess('强制确认');
+            });
+        } else {
+          this.rerenderBatch(complete_bp.batch_id);
+          this.onSuccess('强制确认');
+        }},
       error => {
         this.onFailure('强制确认');
         console.log(error)

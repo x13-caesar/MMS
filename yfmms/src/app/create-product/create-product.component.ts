@@ -13,6 +13,7 @@ import {MatAutocompleteSelectedEvent} from '@angular/material/autocomplete';
 import {Process} from '../shared/models/process';
 import {ProcessComponent} from '../shared/models/process-component';
 import {ActivatedRoute, Router} from '@angular/router';
+import {ProcessService} from '../shared/services/process.service';
 
 @Component({
   selector: 'app-create-product',
@@ -44,6 +45,7 @@ export class CreateProductComponent implements OnInit {
 
   constructor(
     private productService: ProductService,
+    private processService: ProcessService,
     private compoService: CompoService,
     private _snackBar: MatSnackBar,
     private formBuilder: FormBuilder,
@@ -158,9 +160,9 @@ export class CreateProductComponent implements OnInit {
   }
 
   onFinalSubmit(): void {
-    this.newProduct = {...this.newProduct, ...this.productGroup.value}
-    this.newProduct.process = this.processOfProduct;
-    console.log(this.newProduct)
+    this.newProduct = {...this.newProduct, ...this.productGroup.value};
+    this.newProduct.process = this.processService.sortedProcesses(this.processOfProduct);
+    console.log(this.newProduct);
     this.productService.postProduct(this.newProduct).subscribe(
         res => {
           this.onSuccess('创建产品');
@@ -174,9 +176,9 @@ export class CreateProductComponent implements OnInit {
   }
 
   onConfirmEdit() {
-    this.newProduct = {...this.newProduct, ...this.productGroup.value}
-    this.newProduct.process = this.processOfProduct;
-    console.log(this.newProduct)
+    this.newProduct = {...this.newProduct, ...this.productGroup.value};
+    this.newProduct.process = this.processService.sortedProcesses(this.processOfProduct);
+    console.log(this.newProduct);
     this.productService.putProduct(this.newProduct).subscribe(
       res => {
         this.onSuccess('编辑产品信息');

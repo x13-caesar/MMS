@@ -56,7 +56,7 @@ export class CreateWorkDialogComponent implements OnInit {
     this.batchProcess = this.data.bp;
     this.employees = this.data.employees;
     this.employeeOptions = this.selectedEmployee.valueChanges.pipe(
-      map(name => this.employeeAutocompleteFilter(name)));
+      map(name => this.employeeService.employeeAutocompleteFilter(name, this.employees)));
     this.batchProcess.warehouse_record?.forEach(
       wr => this.workSpecGroup.addControl(
         wr.specification_id,
@@ -74,10 +74,6 @@ export class CreateWorkDialogComponent implements OnInit {
 
   onNoClick(): void {
     this.dialogRef.close();
-  }
-
-  employeeAutocompleteFilter(value: string): Employee[] {
-    return this.employees.filter(e => e.name.includes(value));
   }
 
   onWorkConfirm(): void {

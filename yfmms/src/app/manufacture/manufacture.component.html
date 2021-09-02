@@ -36,7 +36,7 @@
             *ngFor="let bp of sortedBatchProcesses(selectedBatch.batch_process)">
             <mat-expansion-panel-header *ngIf="bp.process">
               <mat-panel-title>
-                工艺{{bp.process.process_order}} - {{bp.process.process_name}}
+                <p class="piece">工艺{{bp.process.process_order}} - {{bp.process.process_name}}</p> <p class="detail piece">(DBID：{{bp.id}})</p>
               </mat-panel-title>
               <mat-panel-description>
                 状态：{{statusMap.get(bp.status)}}
@@ -132,6 +132,7 @@
                         color="primary"
                         (click)="startBatchProcess(bp, selectedBatch);rerenderBatch(selectedBatch.id)"
                         *ngIf="bp.status === 'unstarted'">开始该工艺</button>
+                <button mat-button class="call" *ngIf="this.jwtTokenService.getRole() === 'omni'" (click)="openAddDayInvoiceDialog()"> 添加日产记录 </button>
               </div>
             </div>
 

@@ -19,4 +19,6 @@ export interface BatchProcess {
   actual_unit_spec_cost?: number;
   actual_total_work_cost?: number
   actual_overall_cost?: number;
+  ideal_total_work_cost?: number;
+
 }

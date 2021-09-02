@@ -1,11 +1,16 @@
+# coding=utf-8
+
 from fastapi import APIRouter, Depends
 from typing import List
 from .. import schemas
 from ..services import batch_service, process_service
 from sqlalchemy.orm import Session
 from fastapi.encoders import jsonable_encoder
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi import HTTPException
+from collections import defaultdict
+import pandas as pd
+import io
 
 from ..dependencies import get_db
 
@@ -43,11 +48,8 @@ def read_batches_meta_info(db: Session = Depends(get_db)):
 @router.get("/unfinished", response_model=List[schemas.Batch])
 def read_unfinished_batches(db: Session = Depends(get_db)):
     ongoing_batches = batch_service.get_batches_by_status('ongoing', db=db)
-    print(ongoing_batches)
     urgent_batches = batch_service.get_batches_by_status('urgent', db=db)
-    print(urgent_batches)
     unstarted_batches = batch_service.get_batches_by_status('unstarted', db=db)
-    print(unstarted_batches)
     return ongoing_batches + urgent_batches + unstarted_batches
 
 
@@ -71,6 +73,11 @@ def read_recent_ended_batches(db: Session = Depends(get_db)):
     week = timedelta(days=7)
     target = tod - week
     return batch_service.get_batches_end_after(target, db=db)
+
+
+@router.get("/id_pattern/{id_pattern}", response_model=List[schemas.Batch])
+def read_batches_by_id_pattern(id_pattern: str, db: Session = Depends(get_db)):
+    return batch_service.get_batches_by_id_pattern(id_pattern, db=db)
 
 
 @router.get("/{batch_id}", response_model=schemas.Batch)
@@ -158,8 +165,94 @@ def read_batch_start_before(date: datetime, db: Session = Depends(get_db)):
         db=db)
 
 
+@router.get("/batch-summary/download/{batch_id}.csv")
+async def download_batch_summary_csv(batch_id: int, db: Session = Depends(get_db)):
+    db_batch = batch_service.get_batch(batch_id=batch_id, db=db)
+    columns = ['排产', '达产', '交付率', '总计配件成本（标准）', '总计配件成本（实际）',
+               '总计人力成本（标准）', '总计人力成本（实际）', '单位配件成本（标准）', '单位配件成本（实际）',
+               '单位人力成本（标准）', '单位人力成本（实际）']
+    records = {}
+    b_spec_ta, b_spec_ti, b_emp_ta, b_emp_ti = 0, 0, 0, 0
+    b_spec_ua, b_spec_ui, b_emp_ua, b_emp_ui = 0, 0, 0, 0
+    consumption, ideal_unit_consumption = defaultdict(int), defaultdict(int)
+    for bp in db_batch.batch_process:
+        bp_spec_ta, bp_spec_ti, bp_emp_ta, bp_emp_ti = 0, 0, 0, 0
+        bp_spec_ua, bp_spec_ui, bp_emp_ua, bp_emp_ui = 0, 0, 0, 0
+        # 标准消耗量是batch层面的数据，计划略复杂，不能以work数据算
+        # （某道工艺未100%达产会导致后面的 work plan 都不是标准用量）
+        # 所以用 warehouse record 去计算单位产品的标准用量，最后乘 batch plan
+        for wr in bp.warehouse_record:
+            ideal_unit_consumption[wr.component_name] += wr.consumption
+            # 记录【bp 标准单位】
+            bp_spec_ui += wr.specification_gross_price * wr.consumption
+        for w in bp.work:
+            w_spec_ta, w_spec_ti, w_emp_ta, w_emp_ti = 0, 0, 0, 0
+            w_spec_ua, w_spec_ui, w_emp_ua, w_emp_ui = 0, 0, 0, 0
+            # 配件成本 = 配件价格 * （标准|实际用量）
+            # 逐个配件来加总
+            for ws in w.work_specification:
+                w_spec_ta += ws.specification_gross_price * ws.actual_amount
+                w_spec_ti += ws.specification_gross_price * ws.plan_amount
+                # 同时记录实际消耗量
+                consumption[ws.component_name] += ws.actual_amount
+            # 人力成本
+            w_emp_ta = w.complete_hour * w.hour_pay + w.complete_unit * w.unit_pay
+            w_emp_ti = bp.unit_pay * w.plan_unit
+            w_emp_ua = w_emp_ta / w.complete_unit
+            w_emp_ui = bp.unit_pay
+            w_spec_ua = w_spec_ta / w.complete_unit
+            w_spec_ui = w_spec_ui / w.plan_unit
+            # 将 work 数据处理进 【bp 实际总】
+            bp_spec_ta += w_spec_ta
+            bp_emp_ta += w_emp_ta
+        # 【bp 标准总】 需要 【bp 开始数量】
+        # 【bp 实际单位】 需要 【bp 结束数量】
+        bp_spec_ti = bp_spec_ui * bp.start_amount
+        bp_spec_ua = bp_spec_ta / bp.end_amount
+        bp_emp_ti = bp.start_amount * bp.unit_pay
+        bp_emp_ua = bp_emp_ta / bp.end_amount
+        bp_emp_ui = bp.unit_pay
+        # 记录本条 bp
+        bp_record_index = str(bp.process.process_order) + ' - ' + bp.process.process_name
+        records[bp_record_index] = [
+            bp.start_amount, bp.end_amount, bp.end_amount / bp.start_amount, bp_spec_ti, bp_spec_ta,
+            bp_emp_ti, bp_emp_ta, bp_spec_ui, bp_spec_ua, bp_emp_ui, bp_emp_ua
+        ]
+        # 将 bp 数据处理进 【batch 实际总】
+        b_spec_ta += bp_spec_ta
+        b_spec_ti += bp_spec_ti
+        b_emp_ta += bp_emp_ta
+        b_emp_ti += bp_emp_ti
+
+    # 计算【bp 单位】
+    b_spec_ua = b_spec_ta / db_batch.actual_amount
+    b_spec_ui = b_spec_ti / db_batch.plan_amount
+    b_emp_ua = b_emp_ta / db_batch.actual_amount
+    b_emp_ui = b_emp_ti / db_batch.plan_amount
+    # 记录本条 batch
+    batch_record_index = '批次' + str(batch_id) + '总计'
+    records[batch_record_index] = [
+        db_batch.plan_amount, db_batch.actual_amount, db_batch.actual_amount / db_batch.plan_amount,
+        b_spec_ti, b_spec_ta, b_emp_ti, b_emp_ta,
+        b_spec_ui, b_spec_ua, b_emp_ui, b_emp_ua
+    ]
+
+    df = pd.DataFrame.from_dict(records, orient='index',
+                                columns=columns).reset_index()
+    response = StreamingResponse(io.StringIO(df.to_csv(index=False)),
+                                 media_type="text/csv")
+    response.headers["Content-Disposition"] = f"attachment; filename={str(db_batch.id)}.csv"
+    return response
+
+
 @router.post("/", response_model=schemas.Batch)
 def create_batch(batch: schemas.BatchCreate, db: Session = Depends(get_db)):
+    month_db_existing = batch_service.get_batches_in_month(batch.start.year,
+                                                           batch.start.month,
+                                                           db=db)
+    prefix = ((batch.start.year - 2000) * 100 + batch.start.month) * 100
+    suffix = 1 if not month_db_existing else (1 + len(month_db_existing))
+    batch.id = prefix + suffix
     new_batch = batch_service.create_batch(batch=batch, db=db)
     return new_batch
 

@@ -22,6 +22,18 @@ def read_specifications(db: Session = Depends(get_db)):
     return specifications
 
 
+@router.get("/net_price/{specification_id}")
+def read_specification(specification_id: str, db: Session = Depends(get_db)):
+    specification = specification_service.get_specification_net_price_by_id(specification_id=specification_id, db=db)
+    return specification.net_price
+
+
+@router.get("/gross_price/{specification_id}")
+def read_specification(specification_id: str, db: Session = Depends(get_db)):
+    specification = specification_service.get_specification_gross_price_by_id(specification_id=specification_id, db=db)
+    return specification.gross_price
+
+
 @router.get("/{specification_id}", response_model=schemas.Specification)
 def read_specification(specification_id: str, db: Session = Depends(get_db)):
     specification = specification_service.get_specification(specification_id=specification_id, db=db)

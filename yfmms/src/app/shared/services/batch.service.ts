@@ -4,6 +4,7 @@ import {Observable} from 'rxjs';
 import {Batch} from '../models/batch';
 import {environment} from '../../../environments/environment';
 import {PostResponse} from '../models/post-response';
+import {Product} from '../models/product';
 
 @Injectable({
   providedIn: 'root'
@@ -52,11 +53,23 @@ export class BatchService {
     return this.http.put<Batch>(`${environment.API_URL}/batch/complete/${batch_id}/${actual_amount}`, null)
   }
 
+  downloadBatchSummery(batch_id: number): Observable<Blob> {
+    return this.http.get(`${environment.API_URL}/batch/batch-summary/download/${batch_id}.csv`, {responseType: 'blob'})
+  }
+
   autoUpdateBatchStatus(): Observable<PostResponse> {
     return this.http.put<PostResponse>(`${environment.API_URL}/batch/auto_update_status`, null)
   }
 
   getRecentFinishedBatches(): Observable<Batch[]> {
     return this.http.get<Batch[]>(`${environment.API_URL}/batch/recent`)
+  }
+
+  batchAutocompleteFilter(batches: Batch[], input: string): Batch[] {
+    return batches.filter(b => String(b.id).includes(input));
+  }
+
+  batchDisplayFn(batch: Batch) {
+    return batch ? `${batch.id} | ${batch.product_name} * ${batch.plan_amount}` : ''
   }
 }

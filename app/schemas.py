@@ -245,6 +245,7 @@ class BatchProcess(BatchProcessBase):
 
 
 class BatchBase(BaseModel):
+    id: Optional[int]
     status: str
     product_id: str
     plan_amount: int
@@ -261,7 +262,6 @@ class BatchCreate(BatchBase):
 
 
 class Batch(BatchBase):
-    id: int
     batch_process: Optional[List[BatchProcess]]
 
     class Config:

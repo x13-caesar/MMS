@@ -12,6 +12,14 @@ def get_specifications(db: Session):
     return db.query(models.Specification).all()
 
 
+def get_specification_net_price_by_id(specification_id: str, db: Session):
+    return db.query(models.Specification.net_price).filter(models.Specification.id == specification_id).first()
+
+
+def get_specification_gross_price_by_id(specification_id: str, db: Session):
+    return db.query(models.Specification.gross_price).filter(models.Specification.id == specification_id).first()
+
+
 def get_specifications_by_component(component: models.Component, db: Session):
     return db.query(models.Specification).filter(models.Specification.component_id == component.id).all()
 
