@@ -1,5 +1,3 @@
-import {Spec} from './spec';
-
 export interface WorkSpecification {
   id?: number,
   work_id?: number,

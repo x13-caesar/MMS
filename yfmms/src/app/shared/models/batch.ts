@@ -1,4 +1,3 @@
-import {Product} from './product';
 import {BatchProcess} from './batch-process';
 
 export interface Batch {
