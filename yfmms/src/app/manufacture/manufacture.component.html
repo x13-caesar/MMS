@@ -6,9 +6,9 @@
   </div>
 
   <div fxLayout="row" fxLayoutAlign="space-between start" class="fullfill">
-    <mat-card fxFlex="40">
-      <mat-card-header>
-        <mat-card-title> 未完工批次 </mat-card-title>
+    <mat-card fxFlex="40" class="mat-elevation-z8">
+      <mat-card-header class="dark-header">
+        <mat-card-title> <p>未完工批次</p> </mat-card-title>
       </mat-card-header>
       <mat-card-content>
         <mat-selection-list #unfinished [multiple]="false" (selectionChange)="onBatchChange(unfinished.selectedOptions.selected)">
@@ -23,7 +23,7 @@
       </mat-card-content>
     </mat-card>
 
-    <mat-card *ngIf="selectedBatch && selectedBatch.id" fxFlex="60">
+    <mat-card *ngIf="selectedBatch && selectedBatch.id" fxFlex="60" class="mat-elevation-z8">
       <mat-card-header>
         <p class="mat-title highlight">批次：{{selectedBatch.id}}</p>
       </mat-card-header>
@@ -36,7 +36,7 @@
             *ngFor="let bp of sortedBatchProcesses(selectedBatch.batch_process)">
             <mat-expansion-panel-header *ngIf="bp.process">
               <mat-panel-title>
-                <p class="piece">工艺{{bp.process.process_order}} - {{bp.process.process_name}}</p> <p class="detail piece">(DBID：{{bp.id}})</p>
+                <p class="piece subtitle">工艺{{bp.process.process_order}} - {{bp.process.process_name}}</p> <p class="detail piece">(DBID：{{bp.id}})</p>
               </mat-panel-title>
               <mat-panel-description>
                 状态：{{statusMap.get(bp.status)}}
@@ -46,14 +46,18 @@
             <div class="meta-info" *ngIf="bp.process && bp.process.process_order === step">
               <p class="info"> 预计数量：{{bp.start_amount || '尚未开始'}} | 完成数量：{{bp.end_amount || '尚未完成'}}</p>
               <p class="subtitle"> 采用配件： </p>
-              <div class="greyborder distance">
+              <div class="greyborder greybg distance">
                 <p *ngIf="!bp.process.process_component || bp.process.process_component.length === 0"> 无需配件 </p>
                 <div *ngFor="let pc of bp.process.process_component">
                   <form [formGroup]="specChoiceGroup"
                       class="flex-container">
                     <div *ngIf="pc.component" fxLayout="row" fxLayoutAlign="space-between center" class="fullfill">
-                      <p> {{pc.component.name}} * {{pc.consumption}} </p>
-                      <mat-form-field>
+                      <div class="flex-container" fxFlex="40">
+                        <p class="piece record"> {{pc.component.name}} </p>
+                        <p class="piece">({{pc.component_id}})</p>
+                        <p class="piece subtitle"> * {{pc.consumption}} </p>
+                      </div>
+                      <mat-form-field fxFlex="55">
                         <mat-label> 选择具体使用规格 </mat-label>
                         <mat-select [formControlName]="pc.component.id || ''">
                           <mat-option *ngFor="let spec of pc.component.specification" [value]="spec">
@@ -62,6 +66,7 @@
                             </p>
                           </mat-option>
                         </mat-select>
+                        <mat-error *ngIf="specChoiceGroup.controls[pc.component.id || ''].errors?.lack_stock"> 该规格库存不足 </mat-error>
                       </mat-form-field>
                     </div>
                   </form>
@@ -85,7 +90,7 @@
               <p class="subtitle"> 领料记录： </p>
               <div class="greyborder distance work" *ngIf="!bp.work || bp.work.length === 0"> <p>无领料记录</p> </div>
               <div *ngIf="!!bp.work">
-                <div *ngFor="let work of bp.work" class="greyborder distance work">
+                <div *ngFor="let work of bp.work" class="greyborder greybg distance work">
                   <div class="flex-container">
                     <p class="mat-h4 record super-piece"> {{work.employee_name}} (工号{{work.employee_id}}) </p>
                     <p class="mat-h4 record super-piece">计划{{work.plan_unit}}件</p>
@@ -145,6 +150,8 @@
 
         <div class="button-container" fxLayout="row" fxLayoutAlign="end center">
           <button mat-raised-button color="warn" class="insert" *ngIf="selectedBatch.status !== 'urgent'" (click)="setBatchUrgent(selectedBatch)">加急该批次</button>
+          <button mat-raised-button class="call" *ngIf="selectedBatch.status === 'urgent'" (click)="setBatchOngoing(selectedBatch)">取消加急</button>
+          <button mat-raised-button class="scare" [disabled]="selectedBatch.status === 'cancelled'" (click)="openCancelBatchConfirm(selectedBatch)">取消该批次</button>
           <button mat-raised-button color="primary" class="insert"  [disabled]="!checkAllBatchProcessDone(selectedBatch.batch_process)" (click)="completeBatch(selectedBatch)">确认批次完工</button>
         </div>
 

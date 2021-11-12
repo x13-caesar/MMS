@@ -1,17 +1,13 @@
-import {AfterViewInit, Component, OnInit, ViewChild} from '@angular/core';
-import {DataSource} from '@angular/cdk/collections';
+import {Component, OnInit, ViewChild} from '@angular/core';
 import {Product} from '../shared/models/product';
 import {ProductService} from '../shared/services/product.service';
-import {Observable} from 'rxjs';
 import {MatPaginator} from '@angular/material/paginator';
 import {MatTableDataSource} from '@angular/material/table';
 import {MatDialog} from '@angular/material/dialog';
-import {CreateWorkDialogComponent} from '../manufacture/create-work-dialog/create-work-dialog.component';
 import {environment} from '../../environments/environment';
 import {CreateDeliveryDialogComponent} from '../delivery/create-delivery-dialog/create-delivery-dialog.component';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {FormBuilder, FormControl, FormGroup} from '@angular/forms';
-import {Compo} from '../shared/models/compo';
 import {EditProductDialogComponent} from './edit-product-dialog/edit-product-dialog.component';
 import {JWTTokenService} from '../shared/services/jwt-token.service';
 import {CopyProductDialogComponent} from './copy-product-dialog/copy-product-dialog.component';
@@ -76,7 +72,11 @@ export class InventoryComponent implements OnInit {
   }
 
   emptyFilter(): void {
-    this.filterGroup.reset()
+    this.filterGroup.setValue({
+      keyword: '',
+      material: null,
+      category: null
+    })
     this.displayProducts = this.products;
     this.dataSource = new MatTableDataSource<Product>(this.displayProducts);
   }

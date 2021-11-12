@@ -37,4 +37,12 @@ export class SpecService {
   putSpec(spec: Spec): Observable<Spec> {
     return this.http.put<Spec>(`${environment.API_URL}/specifications/`, spec)
   }
+
+  getExistingIds(): Observable<string[]> {
+    return this.http.get<string[]>(`${environment.API_URL}/specifications/existing_ids`)
+  }
+
+  deleteSpec(spec_id: string): Observable<PostResponse> {
+    return this.http.delete<PostResponse>(`${environment.API_URL}/specifications/${spec_id}`)
+  }
 }

@@ -38,12 +38,20 @@ export class EditSpecDialogComponent implements OnInit {
   ngOnInit(): void {
     this.specGroup = this.formBuilder.group({
       id: new FormControl('', Validators.required),
+      component_id: new FormControl(''),
       gross_price: new FormControl(''),
       net_price: new FormControl(''),
       stock: new FormControl(0, Validators.required),
       notice: new FormControl(''),
     });
-    this.specGroup.setValue(this.data.spec);
+    this.specGroup.setValue({
+      id: this.data.spec.id,
+      component_id: this.data.spec.component_id,
+      gross_price: this.data.spec.gross_price,
+      net_price: this.data.spec.net_price,
+      stock: this.data.spec.stock,
+      notice: this.data.spec.notice
+    });
   }
 
   onSpecInfoConfirm(form: FormGroup): void {

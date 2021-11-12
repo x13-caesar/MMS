@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 
 from fastapi.encoders import jsonable_encoder
 
-from . import work_service
+from . import work_service, day_invoice_service
 from .. import models, schemas
 
 from datetime import datetime
@@ -39,7 +39,8 @@ def create_salary(salary: schemas.SalaryCreate, db: Session):
 
 def update_salary(salary: schemas.Salary, db: Session):
     json_salary = jsonable_encoder(salary)
-    json_works = json_salary.pop('work')
+    json_works = json_salary.pop('work', None)
+    json_day_invoice = json_salary.pop('day_invoice', None)
     db_salary = models.Salary(**json_salary)
     db.query(models.Salary). \
         filter(models.Salary.id == db_salary.id). \
@@ -48,6 +49,10 @@ def update_salary(salary: schemas.Salary, db: Session):
         for w in json_works:
             db_work = schemas.Work(**w)
             work_service.update_work(db_work, db=db)
+    if json_day_invoice:
+        for di in json_day_invoice:
+            db_di = schemas.DayInvoice(**di)
+            day_invoice_service.update_day_invoice(db_di, db=db)
     db.commit()
     return db.query(models.Salary).filter(models.Salary.id == db_salary.id).first()
 

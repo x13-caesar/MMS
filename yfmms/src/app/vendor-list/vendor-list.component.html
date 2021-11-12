@@ -19,7 +19,8 @@
               <button mat-icon-button (click)="element.isEdit = !element.isEdit" [disabled]="jwtTokenService.getRole()==='employee'"><mat-icon>edit</mat-icon></button>
             </div>
             <span #spanHeader>
-              {{element[col]}}
+              <p *ngIf="col==='id'">{{vendorService.displayVendorId(element[col])}}</p>
+              <p *ngIf="col!=='id'">{{element[col]}}</p>
             </span>
           </div>
           <div *ngIf="element.isEdit">
@@ -40,7 +41,7 @@
       <tr mat-row *matRowDef="let row; columns: displayedProperties;"></tr>
     </table>
 
-    <mat-paginator [pageSizeOptions]="[5, 10, 20]"
+    <mat-paginator [pageSizeOptions]="[20, 50, 100]"
                    showFirstLastButtons
                    aria-label="Select page of periodic elements"
                    class="mat-elevation-z8 data-table">

@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import {MatDialogRef} from '@angular/material/dialog';
+import {Component, Inject, OnInit} from '@angular/core';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
 import {VendorService} from '../../shared/services/vendor.service';
 import {MatSnackBar} from '@angular/material/snack-bar';
@@ -13,7 +13,6 @@ import {Vendor} from '../../shared/models/vendor';
 export class CreateVendorDialogComponent implements OnInit {
 
   vendorGroup!: FormGroup;
-  newVendor!: Vendor
 
   constructor(
     public dialogRef: MatDialogRef<CreateVendorDialogComponent>,
@@ -30,11 +29,11 @@ export class CreateVendorDialogComponent implements OnInit {
       payment_period: new FormControl(''),
       address: new FormControl(''),
       notice: new FormControl('')
-    })
+    });
   }
 
   onSubmit(form: FormGroup): void {
-    const newVendor = form.value
+    const newVendor = form.value;
     this.vendorService.postVendor(newVendor).subscribe(
       res => {
         this.dialogRef.close(res)

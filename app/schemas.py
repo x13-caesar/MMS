@@ -34,6 +34,8 @@ class ComponentBase(BaseModel):
     warn_stock: int
     picture: Optional[str]
     notice: Optional[str]
+    fill_period: Optional[str]
+    measure: Optional[str]
 
 
 class ComponentCreate(ComponentBase):
@@ -41,7 +43,7 @@ class ComponentCreate(ComponentBase):
 
 
 class SpecificationBase(BaseModel):
-    id: str
+    id: Optional[str]
     component_id: str
     vendor_id: Optional[int]
     gross_price: Optional[float]
@@ -64,6 +66,22 @@ class Specification(SpecificationBase):
 
 class Component(ComponentBase):
     specification: Optional[List[Specification]]
+
+    class Config:
+        orm_mode = True
+
+
+class CompoCategoryBase(BaseModel):
+    category: str
+    prefix: str
+
+
+class CompoCategoryCreate(CompoCategoryBase):
+    pass
+
+
+class CompoCategory(CompoCategoryBase):
+    id: int
 
     class Config:
         orm_mode = True
@@ -332,6 +350,33 @@ class Employee(EmployeeBase):
         orm_mode = True
 
 
+
+class DayInvoiceBase(BaseModel):
+    batch_id: int
+    process_name: str
+    employee_id: int
+    employee_name: Optional[str]
+    work_date: datetime
+    unit_pay: Optional[float]
+    complete_unit: Optional[int]
+    hour_pay: Optional[float]
+    complete_hour: Optional[int]
+    check_status: bool = False
+    check_date: Optional[datetime]
+
+
+class DayInvoiceCreate(DayInvoiceBase):
+    pass
+
+
+class DayInvoice(DayInvoiceBase):
+    id: int
+    salary_id: Optional[int]
+
+    class Config:
+        orm_mode = True
+
+
 class SalaryBase(BaseModel):
     employee_id: int
     employee_name: str
@@ -342,6 +387,7 @@ class SalaryBase(BaseModel):
     deduction: float = 0
     bonus: float = 0
     status: str
+    notice: Optional[str]
     check_date: Optional[datetime]
 
 
@@ -351,7 +397,8 @@ class SalaryCreate(SalaryBase):
 
 class Salary(SalaryBase):
     id: int
-    work: Optional[List[Work]]
+    # work: Optional[List[Work]]
+    day_invoice: Optional[List[DayInvoice]]
 
     class Config:
         orm_mode = True
@@ -370,13 +417,11 @@ class User(UserBase):
         orm_mode = True
 
 
-# token url相应模型
 class Token(BaseModel):
     access_token: str
     token_type: str
 
 
-# 令牌数据模型
 class TokenData(BaseModel):
     username: str = None
 

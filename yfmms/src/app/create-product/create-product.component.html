@@ -47,7 +47,8 @@
 
           <mat-form-field appearance="outline">
             <mat-label>备注</mat-label>
-            <textarea matInput formControlName="notice"></textarea>
+            <textarea matInput formControlName="notice" placeholder="压力范围、精度、充注液体和包装要求等"></textarea>
+            <mat-hint>压力范围、精度、充注液体和包装要求等</mat-hint>
           </mat-form-field>
         </form>
       </mat-card-content>
@@ -58,7 +59,9 @@
         <mat-card-title> 产品工艺 </mat-card-title>
       </mat-card-header>
       <mat-card-content>
-        <form fxLayout="column" fxLayoutAlign="space-around center" [formGroup]="processGroup" (ngSubmit)="onProcessSubmit(processGroup)">
+        <form fxLayout="column"
+              fxLayoutAlign="space-around center"
+              [formGroup]="processGroup">
           <mat-form-field appearance="outline">
             <mat-label>工艺名称</mat-label>
             <input matInput formControlName="process_name">
@@ -67,6 +70,7 @@
           <mat-form-field appearance="outline">
             <mat-label>工艺顺序</mat-label>
             <input type="number" matInput formControlName="process_order">
+            <mat-error *ngIf="processGroup.controls['process_order'].errors?.existing"> 顺序重复 </mat-error>
           </mat-form-field>
 
           <mat-form-field appearance="outline">
@@ -79,36 +83,52 @@
             <textarea matInput formControlName="notice"></textarea>
           </mat-form-field>
 
-          <mat-form-field appearance="outline">
-            <mat-label>所需配件</mat-label>
-            <mat-chip-list #chipList aria-label="compo selection">
-              <mat-chip
-                *ngFor="let compo of composOfProcess"
-                [selectable]="selectable"
-                [removable]="removable"
-                (removed)="remove(compo)">
-                {{compo.name}} | {{compo.id}}
-                <mat-icon matChipRemove *ngIf="removable">cancel</mat-icon>
-              </mat-chip>
-              <input
-                matInput
-                placeholder="所需配件..."
-                #compoInput
-                [formControl]="selectedCompo"
-                [matAutocomplete]="auto"
-                [matChipInputFor]="chipList"
-                [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
-                (matChipInputTokenEnd)="add($event)">
-            </mat-chip-list>
-            <mat-autocomplete #auto="matAutocomplete" [displayWith]="compoDisplayFn" (optionSelected)="selected($event)">
-              <mat-option *ngFor="let compo of this.compoOptions | async" [value]="compo">
-                {{compo.name}} | {{compo.id}} | {{compo.description}}
-              </mat-option>
-            </mat-autocomplete>
-          </mat-form-field>
+          <mat-divider [inset]="true"></mat-divider>
+          <br>
+
+          <div fxLayout="row" fxLayoutAlign="space-between center" class="nty-percent-fill">
+            <mat-form-field appearance="outline" fxFlex="65">
+              <mat-label>对应配件</mat-label>
+              <input type="text" matInput name="peijian" [formControl]="selectedCompo" [matAutocomplete]="auto">
+              <mat-autocomplete #auto="matAutocomplete" [displayWith]="compoService.compoDisplayFn">
+                <mat-option *ngFor="let compo of this.compoOptions | async" [value]="compo">
+                  {{compo.name}} | {{compo.id}}
+                </mat-option>
+              </mat-autocomplete>
+            </mat-form-field>
+            <mat-form-field appearance="outline" fxFlex="15">
+              <mat-label>数量</mat-label>
+              <input type="number" matInput [formControl]="compoNumber">
+            </mat-form-field>
+            <button mat-button
+                    class="call btn-fixed-height"
+                    fxFlex="10"
+                    (click)="pushToCompoArr()"
+                    [disabled]="!selectedCompo.value?.id">添加</button>
+          </div>
+
+          <div class="nty-percent-fill">
+            <mat-list>
+              <mat-list-item *ngFor="let c of compoArr">
+                <div fxLayout="row" fxLayoutAlign="space-between center" class="fullfill">
+                  <div fxLayout="row" fxLayoutAlign="space-between center" class="nty-percent-fill">
+                    <p class="record">{{c.name}}({{c.id}})</p>
+                    <p class="record subtitle">{{c.amount}}件</p>
+                  </div>
+                  <button mat-icon-button (click)="removeFromCompoArr(c)"><mat-icon>delete</mat-icon></button>
+                </div>
+
+                <mat-divider inset="true"></mat-divider>
+              </mat-list-item>
+            </mat-list>
+          </div>
 
           <div class="button-container">
-            <button mat-raised-button color="primary" type="submit" [disabled]="!productGroup.valid">确认添加该工艺</button>
+            <button mat-raised-button color="primary"
+                    (click)="onProcessSubmit(processGroup)"
+                    [disabled]="!productGroup.valid || !processGroup.valid">
+              确认添加该工艺
+            </button>
           </div>
           </form>
       </mat-card-content>
@@ -126,8 +146,9 @@
             <p class="info"> 产品分类：{{this.newProduct.category}} </p>
             <p class="info"> 工艺：</p>
           </div>
+          <button mat-stroked-button class="action" (click)="rearrangeProcess()">排序自动重填</button>
           <mat-accordion class="process-list-display">
-            <mat-expansion-panel hideToggle *ngFor="let process of sortedProcessArray(processOfProduct)">
+            <mat-expansion-panel hideToggle *ngFor="let process of processService.sortedProcesses(processOfProduct)">
               <mat-expansion-panel-header>
                 <mat-panel-title>
                   {{process.process_name}}
@@ -138,7 +159,9 @@
               </mat-expansion-panel-header>
               <div fxLayout="column" fxLayoutAlign="start start">
                 <mat-chip-list aria-label="Fish selection">
-                  <mat-chip color="accent" *ngFor="let pc of process.process_component">{{pc.component_name}} | {{pc.component_id}}</mat-chip>
+                  <p class="record detail" *ngFor="let pc of process.process_component">
+                    {{pc.component_name}}({{pc.component_id}}) * {{pc.consumption}}
+                  </p>
                 </mat-chip-list>
                 <div class="button-container">
                   <button mat-icon-button (click)="editProcess(process)">
@@ -146,6 +169,12 @@
                   </button>
                   <button mat-icon-button (click)="removeProcess(process)">
                     <mat-icon>delete</mat-icon>
+                  </button>
+                  <button mat-icon-button *ngIf="process.process_order !== 1" (click)="moveProcessUp(process)">
+                    <mat-icon>north</mat-icon>
+                  </button>
+                  <button mat-icon-button *ngIf="process.process_order !== processOfProduct.length" (click)="moveProcessDown(process)">
+                    <mat-icon>south</mat-icon>
                   </button>
                 </div>
               </div>

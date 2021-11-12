@@ -11,5 +11,13 @@ export interface Compo {
   warn_stock: number,
   picture?: string,
   notice?: string,
+  fill_period?: string,
+  measure?: string,
   specification?: Spec[]
+}
+
+export interface CompoCategory {
+  id?: number,
+  category: string,
+  prefix: string
 }

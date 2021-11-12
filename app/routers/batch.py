@@ -75,11 +75,6 @@ def read_recent_ended_batches(db: Session = Depends(get_db)):
     return batch_service.get_batches_end_after(target, db=db)
 
 
-@router.get("/id_pattern/{id_pattern}", response_model=List[schemas.Batch])
-def read_batches_by_id_pattern(id_pattern: str, db: Session = Depends(get_db)):
-    return batch_service.get_batches_by_id_pattern(id_pattern, db=db)
-
-
 @router.get("/{batch_id}", response_model=schemas.Batch)
 def read_batch(batch_id: int, db: Session = Depends(get_db)):
     batch = batch_service.get_batch(batch_id=batch_id, db=db)
@@ -239,7 +234,8 @@ async def download_batch_summary_csv(batch_id: int, db: Session = Depends(get_db
 
     df = pd.DataFrame.from_dict(records, orient='index',
                                 columns=columns).reset_index()
-    response = StreamingResponse(io.StringIO(df.to_csv(index=False)),
+    print(df)
+    response = StreamingResponse(io.StringIO('\ufeff' + df.to_csv(index=False)),
                                  media_type="text/csv")
     response.headers["Content-Disposition"] = f"attachment; filename={str(db_batch.id)}.csv"
     return response

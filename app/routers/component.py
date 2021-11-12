@@ -23,6 +23,17 @@ def read_components(db: Session = Depends(get_db)):
     return components
 
 
+@router.get("/all_categories", response_model=List[schemas.CompoCategory])
+def read_components(db: Session = Depends(get_db)):
+    return component_service.get_compo_categories(db=db)
+
+
+@router.get("/existing_ids", response_model=List[str])
+def read_all_component_ids(db: Session = Depends(get_db)):
+    ids = [compo.id for compo in component_service.get_all_ids(db=db)]
+    return ids
+
+
 @router.get("/{component_id}", response_model=schemas.Component)
 def read_component(component_id: str, db: Session = Depends(get_db)):
     component = component_service.get_component(component_id=component_id, db=db)
@@ -80,7 +91,7 @@ def update_component(component: schemas.Component, db: Session = Depends(get_db)
 
 
 @router.delete("/{component_id}")
-def delete_component(component_id: int, db: Session = Depends(get_db)):
+def delete_component(component_id: str, db: Session = Depends(get_db)):
     db_component_data = component_service.get_component(component_id, db=db)
     if not db_component_data:
         raise HTTPException(status_code=400, detail="Matching component not found")

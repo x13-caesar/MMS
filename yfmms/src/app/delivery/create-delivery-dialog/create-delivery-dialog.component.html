@@ -6,15 +6,15 @@
 
 <div mat-dialog-content class="fullfill" fxLayout="column" fxLayoutAlign="space-between center" >
   <form fxLayout="column" fxLayoutAlign="space-around start" [formGroup]="deliveryGroup">
-    <mat-form-field appearance="outline" *ngIf="!data.product">
-      <mat-label>客户</mat-label>
-      <input matInput formControlName="product_id" [matAutocomplete]="prodAuto">
-      <mat-autocomplete #prodAuto="matAutocomplete" [displayWith]="productService.productDisplayFn">
-        <mat-option *ngFor="let prod of this.productOptions | async" [value]="prod">
-          {{prod.name}} | {{prod.id}}
-        </mat-option>
-      </mat-autocomplete>
-    </mat-form-field>
+<!--    <mat-form-field appearance="outline" *ngIf="!data.product">-->
+<!--      <mat-label>客户</mat-label>-->
+<!--      <input matInput formControlName="product_id" [matAutocomplete]="prodAuto">-->
+<!--      <mat-autocomplete #prodAuto="matAutocomplete" [displayWith]="productService.productDisplayFn">-->
+<!--        <mat-option *ngFor="let prod of this.productOptions | async" [value]="prod">-->
+<!--          {{prod.name}} | {{prod.id}}-->
+<!--        </mat-option>-->
+<!--      </mat-autocomplete>-->
+<!--    </mat-form-field>-->
 
     <mat-form-field appearance="outline">
       <mat-label>客户</mat-label>
@@ -52,7 +52,7 @@
 
     <mat-form-field appearance="outline">
       <mat-label>本次交付总价</mat-label>
-      <input type="number" matInput formControlName="total_price">
+      <input type="number" matInput [formControl]="totalPrice">
     </mat-form-field>
 
     <mat-form-field appearance="outline">

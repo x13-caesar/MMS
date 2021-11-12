@@ -13,6 +13,7 @@ import {CompoService} from '../shared/services/compo.service';
   styleUrls: ['./overview.component.scss']
 })
 export class OverviewComponent implements OnInit {
+  urgent_batches!: Batch[];
   ongoing_batches!: Batch[];
   plan_batches!: Batch[];
   recent_finished_batches!: Batch[];
@@ -31,6 +32,15 @@ export class OverviewComponent implements OnInit {
     this.batchService.autoUpdateBatchStatus().subscribe(
       res => {
         if (res.success) {
+          this.batchService.getBatchesByStatus('urgent').subscribe(
+            batches => {
+              this.urgent_batches = batches;
+              this.urgent_batches.forEach(b => {
+                this.productService.getProductNameById(b.product_id).subscribe(
+                  res => b.product_name = res.name
+                )})},
+            error => {console.log(error)}
+          );
           this.batchService.getBatchesByStatus('ongoing').subscribe(
             batches => {
               this.ongoing_batches = batches;

@@ -22,6 +22,12 @@ def read_specifications(db: Session = Depends(get_db)):
     return specifications
 
 
+@router.get("/existing_ids", response_model=List[str])
+def read_all_specification_ids(db: Session = Depends(get_db)):
+    ids = [spec.id for spec in specification_service.get_all_ids(db=db)]
+    return ids
+
+
 @router.get("/net_price/{specification_id}")
 def read_specification(specification_id: str, db: Session = Depends(get_db)):
     specification = specification_service.get_specification_net_price_by_id(specification_id=specification_id, db=db)
@@ -82,7 +88,7 @@ def read_specification_under_price(price: int, gross: bool, db: Session = Depend
         db=db)
 
 
-@router.post("/")
+@router.post("/", response_model=schemas.Specification)
 def create_specification(specification: schemas.SpecificationCreate, db: Session = Depends(get_db)):
     if specification_service.get_specification(specification_id=specification.id,
                                                db=db):
@@ -103,10 +109,10 @@ def adjust_stock(spec_id: str, adjust_number: int, db: Session = Depends(get_db)
                                                       db=db)
 
 
-@router.put("/{specification_id}")
-def update_specification(specification_id: str, specification: schemas.SpecificationCreate,
+@router.put("/", response_model=schemas.Specification)
+def update_specification(specification: schemas.SpecificationCreate,
                          db: Session = Depends(get_db)):
-    db_specification_data = specification_service.get_specification(specification_id, db=db)
+    db_specification_data = specification_service.get_specification(specification.id, db=db)
     if not db_specification_data:
         raise HTTPException(status_code=400, detail="Matching specification not found")
     db_specification_model = schemas.Specification(**jsonable_encoder(db_specification_data))

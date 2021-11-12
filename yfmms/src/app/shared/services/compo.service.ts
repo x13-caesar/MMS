@@ -3,7 +3,7 @@ import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {Product} from '../models/product';
 import {environment} from '../../../environments/environment';
-import {Compo} from '../models/compo';
+import {Compo, CompoCategory} from '../models/compo';
 import {PostResponse} from '../models/post-response';
 
 @Injectable({
@@ -17,6 +17,10 @@ export class CompoService {
 
   getCompos(): Observable<Compo[]> {
     return this.http.get<Compo[]>(`${environment.API_URL}/components`)
+  }
+
+  getCompoCategories(): Observable<CompoCategory[]> {
+    return this.http.get<CompoCategory[]>(`${environment.API_URL}/components/all_categories`)
   }
 
   getCompo(id: string): Observable<Compo> {
@@ -36,7 +40,6 @@ export class CompoService {
   }
 
   compoSearchFilter(compos: Compo[], changes: any): Compo[] {
-    changes.category && (changes.category = changes.categories.toUpperCase());
     changes.material && (changes.material = changes.material.toUpperCase());
     changes.keyword && (changes.keyword = changes.keyword.toUpperCase());
     return compos
@@ -46,5 +49,18 @@ export class CompoService {
         || compo.name.toUpperCase().includes(changes.keyword)
         || compo.description?.toUpperCase().includes(changes.keyword)
         || (compo.notice && compo.notice.toUpperCase().includes(changes.keyword)))
+  }
+
+  getExistingIds(): Observable<string[]> {
+    return this.http.get<string[]>(`${environment.API_URL}/components/existing_ids`)
+  }
+
+  compoAutocompleteFilter(value: string, compos: Compo[]): Compo[] {
+    value = value.toUpperCase();
+    return compos.filter(c => c.name.includes(value) || c.id?.includes(value));
+  }
+
+  compoDisplayFn(compo: Compo): string {
+    return compo && compo.name ? `${compo.name} | ${compo.id}` : '';
   }
 }

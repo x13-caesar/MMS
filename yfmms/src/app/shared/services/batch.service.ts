@@ -53,7 +53,7 @@ export class BatchService {
     return this.http.put<Batch>(`${environment.API_URL}/batch/complete/${batch_id}/${actual_amount}`, null)
   }
 
-  downloadBatchSummery(batch_id: number): Observable<Blob> {
+  downloadBatchSummary(batch_id: number): Observable<Blob> {
     return this.http.get(`${environment.API_URL}/batch/batch-summary/download/${batch_id}.csv`, {responseType: 'blob'})
   }
 

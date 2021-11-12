@@ -8,7 +8,6 @@ import {AuthorizeGuard} from './auth.guard';
 import {AppComponent} from './app.component';
 import {LoginComponent} from './login/login.component';
 import {CreateProductComponent} from './create-product/create-product.component';
-import {CreateEmployeeComponent} from './create-employee/create-employee.component';
 import {CreateSpecComponent} from './create-spec/create-spec.component';
 import {TransmissionComponent} from './transmission/transmission.component';
 import {VendorListComponent} from './vendor-list/vendor-list.component';
@@ -20,6 +19,8 @@ import {SalaryComponent} from './salary/salary.component';
 import {AdminGuard} from './admin.guard';
 import {DeprecatedComponent} from './inventory/deprecated/deprecated.component';
 import {BatchSummaryComponent} from './manufacture/batch-summary/batch-summary.component';
+import {DayInvoiceService} from './shared/services/day-invoice.service';
+import {DayInvoiceListComponent} from './salary/day-invoice-list/day-invoice-list.component';
 
 const routes: Routes = [
   {
@@ -30,6 +31,7 @@ const routes: Routes = [
   { path: 'overview', component: OverviewComponent, canActivate: [AuthorizeGuard] },
   { path: 'inventory', component: InventoryComponent, canActivate: [AuthorizeGuard] },
   { path: 'stock', component: StockComponent, canActivate: [AuthorizeGuard] },
+  { path: 'stock/warn/:warn_compo_id', component: StockComponent, canActivate: [AuthorizeGuard] },
   { path: 'manufacture', component: ManufactureComponent, canActivate: [AuthorizeGuard] },
   { path: 'manufacture/:batch_id', component: ManufactureComponent, canActivate: [AuthorizeGuard] },
   { path: 'batch-summary/:bid', component: BatchSummaryComponent, canActivate: [AuthorizeGuard] },
@@ -40,6 +42,7 @@ const routes: Routes = [
   },
   { path: 'employee', component: EmployeeComponent, canActivate: [AuthorizeGuard, AdminGuard] },
   { path: 'salary', component: SalaryComponent, canActivate: [AuthorizeGuard, AdminGuard]},
+  { path: 'day-invoice', component: DayInvoiceListComponent, canActivate: [AuthorizeGuard]},
   {
     path: 'delivery',
     component: DeliveryComponent,
@@ -63,11 +66,6 @@ const routes: Routes = [
   { path: 'edit-product/:pid', component: CreateProductComponent, canActivate: [AuthorizeGuard] },
   { path: 'copy-product/:origin_id/:new_id', component: CreateProductComponent, canActivate: [AuthorizeGuard] },
   { path: 'deprecated', component: DeprecatedComponent, canActivate: [AuthorizeGuard] },
-  {
-    path: 'create-employee',
-    component: CreateEmployeeComponent,
-    canActivate: [AuthorizeGuard]
-  },
   {
     path: 'create-spec',
     component: CreateSpecComponent,

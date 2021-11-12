@@ -2,8 +2,8 @@
 
   <div fxLayout="row" fxLayoutAlign="space-between start" class="fullfill">
     <mat-card fxFlex="40">
-      <mat-card-header>
-        <mat-card-title> 生产批次列表 </mat-card-title>
+      <mat-card-header class="dark-header">
+        <mat-card-title> <p>生产批次列表</p> </mat-card-title>
       </mat-card-header>
       <mat-card-content>
         <mat-selection-list #unfinished [multiple]="false" (selectionChange)="onBatchChange(unfinished.selectedOptions.selected)">

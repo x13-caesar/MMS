@@ -38,11 +38,24 @@ export class EditComponentDialogComponent implements OnInit {
       description: new FormControl(''),
       expiration: new FormControl(''),
       unit_weight: new FormControl(''),
+      fill_period: new FormControl(''),
       warn_stock: new FormControl(1000, Validators.min(0)),
       notice: new FormControl(''),
       picture: new FormControl('')
     });
-    this.compoGroup.setValue(this.data.compo);
+    this.compoGroup.setValue({
+      id: this.data.compo.id,
+      name: this.data.compo.name,
+      category: this.data.compo.category,
+      material: this.data.compo.material,
+      description: this.data.compo.description,
+      expiration: this.data.compo.expiration,
+      unit_weight: this.data.compo.unit_weight,
+      fill_period: this.data.compo.fill_period,
+      warn_stock: this.data.compo.warn_stock,
+      notice: this.data.compo.notice,
+      picture: this.data.compo.picture,
+    });
   }
 
   onCompoInfoConfirm(form: FormGroup): void {

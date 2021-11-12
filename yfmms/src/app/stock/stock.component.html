@@ -15,11 +15,11 @@
         </mat-select>
       </mat-form-field>
       <mat-form-field appearance="standard" class="filter">
-        <mat-label>种类</mat-label>
+        <mat-label>分类</mat-label>
         <mat-select formControlName="category">
           <mat-option>**不限**</mat-option>
-          <mat-option *ngFor="let c of categories" [value]="c">
-            {{c}}
+          <mat-option *ngFor="let c of categories" [value]="c.category">
+            {{c.category}}
           </mat-option>
         </mat-select>
       </mat-form-field>
@@ -39,8 +39,7 @@
           <div>
             <div class="btn-edit" *ngIf="col ==='edit' ; spanHeader">
               <button mat-icon-button (click)="openEditCompoDialog(element)" [disabled]="jwtTokenService.getRole()==='employee'"><mat-icon>edit</mat-icon></button>
-            </div>
-            <div class="btn-delete" *ngIf="col ==='delete' ; spanHeader">
+              <button mat-icon-button (click)="openAddSpecDialog(element)" [disabled]="jwtTokenService.getRole()==='employee'"><mat-icon>add_circle</mat-icon></button>
               <button mat-icon-button (click)="openDeleteCompoDialog(element)" [disabled]="jwtTokenService.getRole()==='employee'"><mat-icon>delete</mat-icon></button>
             </div>
             <span #spanHeader>
@@ -67,9 +66,10 @@
                 </mat-card-content>
                 <mat-card-actions>
                   <button mat-stroked-button color="primary"
-                          (click)="openEditSpecDialog(spec, element.name)"
+                          (click)="openEditSpecDialog(spec, element)"
                           [disabled]="jwtTokenService.getRole()==='employee'">修改</button>
                   <button mat-stroked-button color="warn"
+                          (click)="openDeleteSpecDialog(spec, element)"
                           [disabled]="jwtTokenService.getRole()==='employee'">删除</button>
                 </mat-card-actions>
               </mat-card>
@@ -86,7 +86,7 @@
       </tr>
       <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="example-detail-row"></tr>
     </table>
-    <mat-paginator [pageSizeOptions]="[5, 10, 20]"
+    <mat-paginator [pageSizeOptions]="[20, 50, 100]"
                    showFirstLastButtons
                    aria-label="Select page of products"
                    class="mat-elevation-z8 data-table">

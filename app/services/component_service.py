@@ -55,3 +55,12 @@ def delete_component(component: schemas.Component, db: Session):
         delete(synchronize_session="fetch")
     db.commit()
     return
+
+
+def get_all_ids(db):
+    return db.query(models.Component.id).all()
+
+
+def get_compo_categories(db):
+    return db.query(models.CompoCategory).all()
+

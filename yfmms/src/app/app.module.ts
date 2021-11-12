@@ -14,7 +14,6 @@ import { ProcessCompleteDialogComponent } from './manufacture/process-complete-d
 import { BatchCompleteDialogComponent } from './manufacture/batch-complete-dialog/batch-complete-dialog.component';
 import { CreateSpecComponent } from './create-spec/create-spec.component';
 import { CreateProductComponent } from './create-product/create-product.component';
-import { CreateEmployeeComponent } from './create-employee/create-employee.component';
 import { StockComponent } from './stock/stock.component';
 import { PullInDialogComponent } from './stock/pull-in-dialog/pull-in-dialog.component';
 import { LoginComponent } from './login/login.component';
@@ -42,12 +41,17 @@ import { CreateBuyerDialogComponent } from './buyer-list/create-buyer-dialog/cre
 import { EditProductDialogComponent } from './inventory/edit-product-dialog/edit-product-dialog.component';
 import { SalaryComponent } from './salary/salary.component';
 import { CreateSalaryForOneDialogComponent } from './salary/create-salary-for-one-dialog/create-salary-for-one-dialog.component';
-import { CreateSalaryForAllComponent } from './salary/create-salary-for-all/create-salary-for-all.component';
 import { AddDayInvoiceDialogComponent } from './manufacture/add-day-invoice-dialog/add-day-invoice-dialog.component';
 import { CopyProductDialogComponent } from './inventory/copy-product-dialog/copy-product-dialog.component';
 import { ConfirmDeprecateDialogComponent } from './inventory/confirm-deprecate-dialog/confirm-deprecate-dialog.component';
 import { DeprecatedComponent } from './inventory/deprecated/deprecated.component';
 import { BatchSummaryComponent } from './manufacture/batch-summary/batch-summary.component';
+import { AddSpecDialogComponent } from './stock/add-spec-dialog/add-spec-dialog.component';
+import { DayInvoiceListComponent } from './salary/day-invoice-list/day-invoice-list.component';
+import {MatTooltipModule} from '@angular/material/tooltip';
+import { CancelBatchConfirmDialogComponent } from './manufacture/cancel-batch-confirm-dialog/cancel-batch-confirm-dialog.component';
+import { ConfirmEmployeeLeaveDialogComponent } from './employee/confirm-employee-leave-dialog/confirm-employee-leave-dialog.component';
+import { DeleteSpecConfirmDialogComponent } from './stock/delete-spec-confirm-dialog/delete-spec-confirm-dialog.component';
 
 @NgModule({
   declarations: [
@@ -61,7 +65,6 @@ import { BatchSummaryComponent } from './manufacture/batch-summary/batch-summary
     BatchCompleteDialogComponent,
     CreateSpecComponent,
     CreateProductComponent,
-    CreateEmployeeComponent,
     StockComponent,
     PullInDialogComponent,
     LoginComponent,
@@ -86,23 +89,28 @@ import { BatchSummaryComponent } from './manufacture/batch-summary/batch-summary
     EditProductDialogComponent,
     SalaryComponent,
     CreateSalaryForOneDialogComponent,
-    CreateSalaryForAllComponent,
     AddDayInvoiceDialogComponent,
     CopyProductDialogComponent,
     ConfirmDeprecateDialogComponent,
     DeprecatedComponent,
-    BatchSummaryComponent
+    BatchSummaryComponent,
+    AddSpecDialogComponent,
+    DayInvoiceListComponent,
+    CancelBatchConfirmDialogComponent,
+    ConfirmEmployeeLeaveDialogComponent,
+    DeleteSpecConfirmDialogComponent
   ],
-    imports: [
-      HttpClientModule,
-      BrowserModule,
-      AppRoutingModule,
-      BrowserAnimationsModule,
-      MatDividerModule,
-      ReactiveFormsModule,
-      CustomStyleModule,
-      FormsModule,
-    ],
+  imports: [
+    HttpClientModule,
+    BrowserModule,
+    AppRoutingModule,
+    BrowserAnimationsModule,
+    MatDividerModule,
+    ReactiveFormsModule,
+    CustomStyleModule,
+    FormsModule,
+    MatTooltipModule,
+  ],
   providers: [],
   bootstrap: [AppComponent]
 })

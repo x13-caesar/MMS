@@ -1,0 +1,151 @@
+<div class="dark-header">
+  <p class="mat-h3">添加日产记录</p>
+</div>
+<br>
+
+<div mat-dialog-content fxLayout="row" fxLayoutAlign="space-around start">
+  <section fxLayout="column" fxLayoutAlign=" none" fxFlex="30">
+    <form>
+<!--      <mat-form-field appearance="outline">-->
+<!--        <mat-label>生产批次</mat-label>-->
+<!--        <mat-select [(ngModel)]="selectedBatch" (ngModelChange)="onBatchChange()">-->
+<!--          <mat-option *ngFor="let b of workingBatches" [value]="b" class="flex-container">-->
+<!--            <p>{{b.product_name}}（{{b.plan_amount}}件）| {{b.start | date:"YYYY/MM/dd" }}</p>-->
+<!--          </mat-option>-->
+<!--        </mat-select>-->
+<!--      </mat-form-field>-->
+
+<!--      <mat-form-field *ngIf="selectedBatch" appearance="outline">-->
+<!--        <mat-label>工艺流程</mat-label>-->
+<!--        <mat-select [(ngModel)]="selectedBatchProcess" (ngModelChange)="onBatchProcessChange()">-->
+<!--          <mat-option>&#45;&#45;&#45;&#45;</mat-option>-->
+<!--          <mat-option *ngFor="let bp of bpService.sortedBatchProcesses(selectedBatch.batch_process)" [value]="bp"> {{bp.process?.process_order}} - {{bp.process?.process_name}} </mat-option>-->
+<!--        </mat-select>-->
+<!--      </mat-form-field>-->
+
+<!--      <mat-form-field *ngIf="selectedBatchProcess" appearance="outline">-->
+<!--        <mat-label>工单</mat-label>-->
+<!--        <mat-select [(ngModel)]="selectedWork">-->
+<!--          <mat-option>&#45;&#45;&#45;&#45;</mat-option>-->
+<!--          <mat-option *ngFor="let work of selectedBatchProcess.work" [value]="work"> {{work.employee_name}} | {{work.work_date | date : 'yyyy/MM/dd'}} | 计划 {{work.plan_unit}} 件 </mat-option>-->
+<!--        </mat-select>-->
+<!--      </mat-form-field>-->
+
+      <mat-form-field appearance="outline">
+        <mat-label>生产批次</mat-label>
+        <input matInput [formControl]="selectedBatch"  [matAutocomplete]="bauto">
+        <mat-autocomplete #bauto="matAutocomplete" [displayWith]="batchService.batchDisplayFn">
+          <mat-option *ngFor="let b of this.workingBatchOptions | async" [value]="b">
+            {{b.id}} | {{b.product_name}} * {{b.plan_amount}}
+          </mat-option>
+        </mat-autocomplete>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>工艺</mat-label>
+        <input matInput [formControl]="selectedBatchProcess"  [matAutocomplete]="bpauto">
+        <mat-autocomplete #bpauto="matAutocomplete" [displayWith]="bpService.batchProcessDisplayFn">
+          <mat-option *ngFor="let bp of this.bpOptions | async" [value]="bp">
+            {{bp.process?.process_order}} - {{bp.process?.process_name}}
+          </mat-option>
+        </mat-autocomplete>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>工单</mat-label>
+        <input matInput [formControl]="selectedWork"  [matAutocomplete]="wauto">
+        <mat-autocomplete #wauto="matAutocomplete" [displayWith]="workService.workDisplayFn">
+          <mat-option *ngFor="let w of this.workOptions | async" [value]="w">
+            {{w.employee_name}} ({{w.employee_id}})
+          </mat-option>
+        </mat-autocomplete>
+      </mat-form-field>
+    </form>
+
+    <br>
+    <mat-divider></mat-divider>
+    <div class="button-container fullfill">
+      <p class="highlight">如需为历史生产批次添加日产单，请在这里输入：</p>
+      <mat-form-field appearance="fill">
+        <mat-label>历史批次号</mat-label>
+        <input matInput [formControl]="finishedBatchAddCtrl">
+      </mat-form-field>
+      <button mat-stroked-button color="primary"
+              [disabled]="!finishedBatchAddCtrl.valid"
+              (click)="onFinishedBatchAdd(finishedBatchAddCtrl.value)"> 确认 </button>
+    </div>
+
+  </section>
+
+  <section fxLayout="column" fxLayoutAlign=" none" *ngIf="selectedWork.value" fxFlex="60">
+    <mat-expansion-panel hideToggle>
+      <mat-expansion-panel-header>
+        <mat-panel-title class="flex-container">
+          <p class="record piece">{{selectedWork.value.process_name}}</p>
+          <p class="record piece">计划 {{selectedWork.value.plan_unit}} 件</p>
+        </mat-panel-title>
+        <mat-panel-description>
+          <p class=" piece">{{selectedWork.value.work_date | date : 'yyyy/MM/dd'}}</p>
+          <p class=" piece">计件工资：{{selectedWork.value.unit_pay | currency : 'CNY' : 'symbol-narrow'}}</p>
+          <p class=" piece">小时工资：{{selectedWork.value.hour_pay | currency : 'CNY' : 'symbol-narrow'}}</p>
+        </mat-panel-description>
+      </mat-expansion-panel-header>
+      <mat-list>
+        <mat-list-item *ngFor="let ws of selectedWork.value.work_specification" class="flex-container">
+          <p class="mat-h4 piece">{{ws.component_name}}</p>
+          <p class="mat-h4 piece">应领：{{ws.plan_amount}}</p>
+          <p class="mat-h4 piece">（实领：{{ws.actual_amount}}）</p>
+        </mat-list-item>
+      </mat-list>
+      <div  class="flex-container">
+        <p class="info piece">已完成件数：{{selectedWork.value.complete_unit}}</p>
+        <p class="info piece">已完成小时：{{selectedWork.value.complete_hour}}</p>
+      </div>
+    </mat-expansion-panel>
+    <div class="day-produce-form-container greyborder isolated distance">
+      <div class="isolated">
+        <p class="mat-h3 subtitle">添加日产信息</p>
+      </div>
+      <mat-form-field appearance="fill">
+        <mat-label>日期</mat-label>
+        <input [matDatepicker]="picker" [formControl]="dateCtrl" matInput>
+        <mat-datepicker-toggle matSuffix [for]="picker">
+        </mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+      </mat-form-field>
+
+      <div class="isolated">
+        <p>酬劳结算方式</p>
+        <mat-button-toggle-group [(ngModel)]="calculateMethod" aria-label="Font Style">
+          <mat-button-toggle value="unit">计件<mat-icon>category</mat-icon></mat-button-toggle>
+          <mat-button-toggle value="hour">计时<mat-icon>timer</mat-icon></mat-button-toggle>
+        </mat-button-toggle-group>
+      </div>
+      <div class="unit-pay-template">
+        <mat-form-field appearance="outline">
+          <mat-label>添加完成件数</mat-label>
+          <input matInput type="number" step="1" [formControl]="completeUnitCtrl">
+        </mat-form-field>
+      </div>
+      <div class="hour-pay-template"
+           *ngIf="calculateMethod==='hour'"
+           fxLayout="column"
+           fxLayoutAlign="space-around start">
+        <mat-form-field appearance="outline">
+          <mat-label>工作小时数</mat-label>
+          <input matInput type="number" step="0.5" [formControl]="completeHourCtrl">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>每小时工资</mat-label>
+          <input matInput type="number" step="0.01" [(ngModel)]="selectedWork.value.hour_pay">
+        </mat-form-field>
+      </div>
+
+    </div>
+  </section>
+</div>
+
+<div mat-dialog-actions>
+  <button mat-raised-button color="primary" (click)="onConfirmClick()">确认修改</button>
+  <button mat-button (click)="onNoClick()">关闭</button>
+</div>

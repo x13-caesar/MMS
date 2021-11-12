@@ -14,6 +14,7 @@ import {Process} from '../shared/models/process';
 import {ProcessComponent} from '../shared/models/process-component';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ProcessService} from '../shared/services/process.service';
+import {existingOrderValidator} from '../shared/existing-order.directive';
 
 @Component({
   selector: 'app-create-product',
@@ -28,25 +29,25 @@ export class CreateProductComponent implements OnInit {
   processOfProduct: Process[] = []
 
   processCompoGroup!: FormGroup
-  composOfProcess: Compo[] = []
 
   compos: Compo[] = [];
   compoOptions!: Observable<Compo[]>;
   selectedCompo = new FormControl();
+  compoNumber = new FormControl(1);
+  compoArr: CompoRecord[] = [];
 
   // MAT chip list params
   selectable = true;
-  removable = true;
-  separatorKeysCodes: number[] = [ENTER, COMMA];
 
   @ViewChild('compoInput') compoInput!: ElementRef<HTMLInputElement>;
   public editProductId: string = '';
   public originProductId: string = '';
+  public newProductId: string = ''
 
   constructor(
     private productService: ProductService,
-    private processService: ProcessService,
-    private compoService: CompoService,
+    public processService: ProcessService,
+    public compoService: CompoService,
     private _snackBar: MatSnackBar,
     private formBuilder: FormBuilder,
     private route: ActivatedRoute,
@@ -56,6 +57,7 @@ export class CreateProductComponent implements OnInit {
   ngOnInit(): void {
     this.editProductId = this.route.snapshot.paramMap.get('pid') || '';
     this.originProductId = this.route.snapshot.paramMap.get('origin_id') || '';
+    this.newProductId = this.route.snapshot.paramMap.get('new_id') || '';
     this.productGroup = this.formBuilder.group({
       id: new FormControl('', [Validators.required, Validators.maxLength(16), Validators.pattern('[a-zA-Z0-9]*')]),
       name: new FormControl('', Validators.required),
@@ -68,7 +70,9 @@ export class CreateProductComponent implements OnInit {
     });
     this.processGroup = this.formBuilder.group({
       process_name: new FormControl('', Validators.required),
-      process_order: new FormControl(1, [Validators.required, Validators.min(1)]),
+      process_order: new FormControl(1,
+        [Validators.required, Validators.min(1),
+          existingOrderValidator(this.processOfProduct.map(p => p.process_order))]),
       unit_pay: new FormControl(null, [Validators.required, Validators.min(0)]),
       notice: new FormControl('')
     });
@@ -89,10 +93,25 @@ export class CreateProductComponent implements OnInit {
       this.productService.getProductById(this.editProductId || this.originProductId).subscribe(
         target_prod => {
           target_prod.process?.forEach(p => p.process_component.forEach(pc => pc.component_name = pc.component?.name));
+          this.processGroup.controls['process_order'].setValue((target_prod.process?.length || 0) + 1);
           this.newProduct = target_prod;
           this.processOfProduct = target_prod.process || [];
+          this.processGroup.controls['process_order'].setValidators(
+            [Validators.required, Validators.min(1), existingOrderValidator(this.processOfProduct.map(p => p.process_order))])
           delete target_prod.process;
-          this.productGroup.setValue(target_prod);
+          this.productGroup.setValue({
+            id: target_prod.id,
+            name: target_prod.name,
+            category: target_prod.category,
+            description: target_prod.description,
+            inventory: target_prod.inventory,
+            custom: target_prod.custom,
+            notice: target_prod.notice,
+            picture: target_prod.picture
+          });
+          if (this.newProductId) {
+            this.productGroup.controls['id'].setValue(this.newProductId);
+          }
         }
       );
       this.originProductId && this.productGroup.controls['id'].setValue(this.originProductId);
@@ -100,63 +119,36 @@ export class CreateProductComponent implements OnInit {
     }
   }
 
-  add(event: MatChipInputEvent): void {
-    const value = (event.value || '').trim();
-
-    // Add our fruit
-    if (value) {
-      // @ts-ignore
-      this.composOfProcess.push(value);
-    }
-
-    this.selectedCompo.setValue(null);
-  }
-
-  remove(compo: Compo): void {
-    const index = this.composOfProcess.indexOf(compo);
-
-    if (index >= 0) {
-      this.composOfProcess.splice(index, 1);
-    }
-  }
-
-  selected(event: MatAutocompleteSelectedEvent): void {
-    this.composOfProcess.push(event.option.value);
-    this.compoInput.nativeElement.value = '';
-    this.selectedCompo.setValue(null);
-  }
 
   removeProcess(process: Process): void {
     const index = this.processOfProduct.indexOf(process);
     if (index >= 0) {
       this.processOfProduct.splice(index, 1);
-      this.processGroup.controls['process_order'].setValue(this.processOfProduct.length + 1)
+      this.processGroup.controls['process_order'].setValue(this.processOfProduct.length + 1);
+      this.processGroup.controls['process_order'].setValidators(
+        [Validators.required, Validators.min(1), existingOrderValidator(this.processOfProduct.map(p => p.process_order))])
     }
   }
 
   onProcessSubmit(form: FormGroup): void {
     const newProcess: Process = {...form.value, product_id: this.productGroup.controls['id'].value};
     newProcess.process_component = [];
-    this.composOfProcess.forEach(
-      compo => {
-        const existingIdx = newProcess.process_component.findIndex(pc => pc.component_id === compo.id)
-        if (existingIdx >= 0) {
-          newProcess.process_component[existingIdx].consumption += 1
-        } else {
-          const pc: ProcessComponent = {
-            consumption: 1,
-            component_id: compo.id || 'placeholder',
+    this.compoArr.forEach(
+      record => {
+        const pc: ProcessComponent = {
+            consumption: record.amount,
+            component_id: record.id || '',
             attrition_rate: 0.001,
-            component_name: compo.name
+            component_name: record.name
           }
-          newProcess.process_component.push(pc);
-        }
+        newProcess.process_component.push(pc);
       });
     this.processOfProduct.push(newProcess);
     this.processGroup.reset();
     this.selectedCompo.reset();
-    this.composOfProcess = [];
+    this.compoArr = [];
     this.processGroup.controls['process_order'].setValue(this.processOfProduct.length + 1)
+    this.processGroup.controls['process_order'].setValidators([Validators.required, Validators.min(1), existingOrderValidator(this.processOfProduct.map(p => p.process_order))])
   }
 
   onFinalSubmit(): void {
@@ -169,7 +161,7 @@ export class CreateProductComponent implements OnInit {
           this.productGroup.reset();
           this.productGroup.reset();
           this.processOfProduct = [];
-          this.composOfProcess = [];
+          this.compoArr = [];
         },
         error => this.onFailure('创建产品')
       )
@@ -200,29 +192,81 @@ export class CreateProductComponent implements OnInit {
     return this.compos.filter(c => c.name.includes(value));
   }
 
-  compoDisplayFn(compo: Compo): string {
-    return compo && compo.name ? `${compo.name} | ${compo.id}` : '';
-  }
-
-  sortedProcessArray(process_array: Process[]): Process[] {
-    return process_array.sort((a, b) => (Number(a.process_order) - Number(b.process_order)))
-  }
-
   editProcess(process: Process) {
     const index = this.processOfProduct.indexOf(process);
     if (index >= 0) {
       this.processOfProduct.splice(index, 1);
     }
     const pcs = process.process_component;
-    console.log(this.composOfProcess);
     this.processGroup.setValue({
       process_name: process.process_name,
       process_order: process.process_order,
       unit_pay: process.unit_pay,
       notice: process.notice,
     });
-    this.composOfProcess = pcs.map(pc => this.compos.find(c => c.id === pc.component_id) || this.compos[0]);
-    console.log(this.composOfProcess);
+    this.compoArr = pcs.map(pc => {
+      return {id: pc.component_id, name: pc.component_name || '', amount: pc.consumption}
+    })
+    this.processGroup.controls['process_order'].setValidators([Validators.required, Validators.min(1),
+      existingOrderValidator(this.processOfProduct.map(p => p.process_order))])
+    // this.composOfProcess = pcs.map(pc => this.compos.find(c => c.id === pc.component_id) || this.compos[0]);
   }
 
+  rearrangeProcess() {
+    this.processOfProduct = this.processService.sortedProcesses(this.processOfProduct)
+    let count = 1;
+    this.processOfProduct.forEach(p => {
+      p.process_order = count;
+      count++;
+    });
+    this.onSuccess('重排序');
+  }
+
+  moveProcessUp(process: Process) {
+    const initOrder = process.process_order;
+    const idx = this.processOfProduct.indexOf(process);
+    const upOrder = this.processOfProduct[idx-1].process_order;
+    this.processOfProduct[idx].process_order = upOrder;
+    this.processOfProduct[idx-1].process_order = initOrder;
+    this.processService.sortedProcesses(this.processOfProduct);
+  }
+
+  moveProcessDown(process: Process) {
+    const initOrder = process.process_order;
+    const idx = this.processOfProduct.indexOf(process);
+    const downOrder = this.processOfProduct[idx+1].process_order;
+    this.processOfProduct[idx].process_order = downOrder;
+    this.processOfProduct[idx+1].process_order = initOrder;
+    this.processService.sortedProcesses(this.processOfProduct);
+  }
+
+  pushToCompoArr() {
+    const targetIdx = this.compoArr.findIndex(record => record.id === this.selectedCompo.value.id);
+    if (targetIdx >= 0) {
+      const prev = this.compoArr[targetIdx];
+      // @ts-ignore
+      prev.amount += this.compoNumber.value;
+      this.compoArr[targetIdx] = prev;
+    } else {
+      // @ts-ignore
+      this.compoArr.push(
+        {id: this.selectedCompo.value.id,
+          name: this.selectedCompo.value.name,
+          amount: this.compoNumber.value})
+    }
+    this.compoNumber.setValue(1);
+  }
+
+  removeFromCompoArr(c: CompoRecord) {
+    const targetIdx = this.compoArr.findIndex(record => record.id === c.id);
+    if (targetIdx >= 0) {
+      this.compoArr.splice(targetIdx, 1);
+    }
+  }
+}
+
+class CompoRecord {
+  id!: string
+  name!: string
+  amount!: number
 }

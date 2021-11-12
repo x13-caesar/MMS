@@ -27,7 +27,9 @@ export class DeleteComponentDialogComponent implements OnInit {
 
   onConfirmDelete(): void {
     this.compoService.deleteCompo(String(this.data.compo.id)).subscribe(
-      res => this.dialogRef.close(res),
+      res => {
+        this.dialogRef.close(res);
+      },
       error => this._snackBar.open(`删除失败`, "关闭")
     )
   }

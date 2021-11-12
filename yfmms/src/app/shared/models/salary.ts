@@ -1,4 +1,4 @@
-import {Work} from './work';
+import {DayInvoice} from '../services/day-invoice';
 
 export interface Salary {
   id?: number,
@@ -11,6 +11,7 @@ export interface Salary {
   deduction: number,
   bonus: number,
   status: string,
+  notice: string,
   check_date?: Date,
-  work?: Work[]
+  day_invoice?: DayInvoice[]
 }

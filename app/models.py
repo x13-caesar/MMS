@@ -21,7 +21,7 @@ class Component(Base):
 
     id = Column(String, primary_key=True)
     name = Column(String)
-    category = Column(String)
+    category = Column(String, ForeignKey('compo_category.category'))
     material = Column(String)
     description = Column(String)
     expiration = Column(String)
@@ -29,6 +29,16 @@ class Component(Base):
     warn_stock = Column(Integer)
     picture = Column(String)
     notice = Column(String)
+    fill_period = Column(String)
+    measure = Column(String)
+
+
+class CompoCategory(Base):
+    __tablename__ = 'compo_category'
+
+    id = Column(Integer, primary_key=True)
+    category = Column(String)
+    prefix = Column(String)
 
 
 class Specification(Base):
@@ -43,16 +53,16 @@ class Specification(Base):
     blueprint = Column(String)
     notice = Column(String)
     component = relationship('Component', back_populates='specification')
-    vendor = relationship("Vendor", back_populates="specification")
+    vendor = relationship("Vendor", backref="specification")
 
 
 Component.specification = relationship("Specification",
                                        order_by=Specification.id,
                                        back_populates="component")
-
-Vendor.specification = relationship("Specification",
-                                    order_by=Specification.id,
-                                    back_populates="vendor")
+#
+# Vendor.specification = relationship("Specification",
+#                                     order_by=Specification.id,
+#                                     back_populates="vendor")
 
 
 class Buyer(Base):
@@ -211,8 +221,9 @@ class Salary(Base):
     deduction = Column(Float)
     bonus = Column(Float)
     status = Column(String)
-    work = relationship("Work", backref="salary")
+    notice = Column(String)
     check_date = Column(DateTime)
+    day_invoice = relationship("DayInvoice", backref="salary")
 
 
 class Work(Base):
@@ -279,3 +290,22 @@ class WarehouseRecord(Base):
     consumption = Column(Integer)
     specification_net_price = Column(Float)
     specification_gross_price = Column(Float)
+
+
+class DayInvoice(Base):
+    __tablename__ = 'day_invoice'
+
+    id = Column(Integer, primary_key=True)
+    batch_id = Column(Integer, ForeignKey('batch.id'))
+    process_name = Column(String)
+    employee_id = Column(Integer, ForeignKey('employee.id'))
+    employee_name = Column(String)
+    work_date = Column(DateTime)
+    unit_pay = Column(Float)
+    complete_unit = Column(Integer)
+    hour_pay = Column(Float)
+    complete_hour = Column(Integer)
+    check_status = Column(Boolean)
+    check_date = Column(DateTime)
+    salary_id = Column(Integer, ForeignKey('salary.id'))
+

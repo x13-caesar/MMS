@@ -61,4 +61,12 @@ export class WorkService {
   sortWorkByDate(works: Work[]): Work[] {
     return works.sort((a, b) => (Number(a.work_date) - Number(b.work_date)))
   }
+
+  workAutocompleteFilter(works: Work[], input: string): Work[] {
+    return works.filter(w => String(w.employee_id).includes(input) || w.employee_name.includes(input));
+  }
+
+  workDisplayFn(work: Work) {
+    return work ? `${work.employee_name} (${work.employee_id})` : ''
+  }
 }

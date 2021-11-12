@@ -25,6 +25,8 @@ import {SpecService} from '../shared/services/spec.service';
 import {ActivatedRoute} from '@angular/router';
 import {JWTTokenService} from '../shared/services/jwt-token.service';
 import {AddDayInvoiceDialogComponent} from './add-day-invoice-dialog/add-day-invoice-dialog.component';
+import {lackStockValidation} from '../shared/lack-stock.directive';
+import {CancelBatchConfirmDialogComponent} from './cancel-batch-confirm-dialog/cancel-batch-confirm-dialog.component';
 
 @Component({
   selector: 'app-manufacture',
@@ -39,7 +41,7 @@ export class ManufactureComponent implements OnInit {
   selectedBatchProcess!: BatchProcess;
 
   step = 1;
-  batchTitleClass = new Map([['ongoing', 'success'], ['urgent', 'warn'], ['unstarted', 'promise']])
+  batchTitleClass = new Map([['ongoing', 'success'], ['urgent', 'warn'], ['unstarted', 'promise'], ['cancelled', 'cancelled']])
   statusMap = new Map([['ongoing', '生产中'], ['urgent', '加急'], ['unstarted', '未开始'], ['finished', '已完成']])
 
 
@@ -102,7 +104,7 @@ export class ManufactureComponent implements OnInit {
     this.specChoiceGroup = this.formBuilder.group({});
     bp.process?.process_component.forEach(
       pc => {
-        this.specChoiceGroup.addControl(pc.component_id, this.formBuilder.control('', Validators.required));
+        this.specChoiceGroup.addControl(pc.component_id, this.formBuilder.control('', [Validators.required, lackStockValidation(pc.consumption*(bp.start_amount || 1))]));
       }
     );
     if (bp.warehouse_record && bp.warehouse_record.length > 0) {
@@ -406,5 +408,33 @@ export class ManufactureComponent implements OnInit {
 
   print(element: any) {
     console.log(element);
+  }
+
+  setBatchOngoing(selectedBatch: Batch) {
+    this.batchService.putBatch({...selectedBatch, status: 'ongoing'}).subscribe(
+      res => {
+        this.rerenderBatch(res.id!);
+        this.onSuccess('加急取消')
+      },
+      error => {
+        this.onFailure('加急取消')
+        console.log(error)
+      }
+    )
+  }
+
+  openCancelBatchConfirm(batch: Batch) {
+    const dialogRef = this.dialog.open(CancelBatchConfirmDialogComponent, {
+      width: environment.SMALL_DIALOG_WIDTH,
+      data: {batch: batch}
+    });
+    dialogRef.afterClosed().subscribe(
+      res => {
+        if (!!res) {
+          this.onSuccess('取消批次');
+          this.rerenderBatch(res.id);
+        }
+      }
+    );
   }
 }

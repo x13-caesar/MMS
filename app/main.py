@@ -2,7 +2,7 @@ from fastapi import FastAPI
 import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
 from .routers import vendor, specification, component, batch, batch_process, buyer, delivery, employee, operation, \
-    process, process_component, product, salary, work, work_specification, warehouse_record, user
+    process, process_component, product, salary, work, work_specification, warehouse_record, day_invoice, user
 from .security import token
 
 app = FastAPI(
@@ -14,7 +14,7 @@ controllers = [vendor, buyer,
                product,
                specification, component,
                batch, batch_process, delivery,
-               employee, salary, work, work_specification, warehouse_record,
+               employee, salary, work, work_specification, warehouse_record, day_invoice,
                process, process_component,
                operation,
                token,

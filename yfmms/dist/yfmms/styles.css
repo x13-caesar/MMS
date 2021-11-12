@@ -11,14 +11,21 @@ body {
 /* You can add global styles to this file, and also import other style files */
 :root {
   --logoblue: rgb(95, 141, 157);
-  --highlightblue: #3498db;
-  --lowkeyblue: #2980b9;
-  --deepblue: #2c3e50;
-  --darkblue: #34495e;
-  --infoyellow: #d35400;
-  --warnred: #c0392b;
-  --backwardgrey: #7f8c8d;
-  --bggrey: rgb(247,249,250);
+  --highlightblue: rgb(52, 152, 219);
+  --lowkeyblue: rgb(41, 128, 185);
+  --deepblue: rgb(0, 18, 66);
+  --darkblue: rgb(52, 73, 94);
+  --infoyellow: rgb(209, 123, 15);
+  --infopeel: rgb(255, 160, 28);
+  --humblegreen: rgb(159, 183, 152);
+  --forestgreen: rgb(10, 50, 0);
+  --warnred: rgb(192, 57, 43);
+  --coral: rgb(239, 111, 108);
+  --backwardgrey: rgb(127, 140, 141);
+  --lightgold: rgb(220, 196, 142);
+  --bggrey: rgb(242, 245, 247);
+  --bglight: rgb(242, 245, 247);
+  --headerblue: rgb(0, 93, 124);
 }
 .clickable:hover {
   cursor: pointer;
@@ -33,6 +40,19 @@ html, body {
 body {
   margin: 0;
   font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+mat-card-header.dark-header, div.dark-header {
+  background-color: var(--headerblue);
+  position: relative;
+  height: 40px;
+}
+mat-card-header.dark-header p, div.dark-header p {
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: ghostwhite;
 }
 img.logo-normal {
   width: 200px;
@@ -123,7 +143,7 @@ p.vertical-middle {
   /* 4 */
 }
 p.highlight, b.highlight {
-  color: var(--logoblue);
+  color: var(--headerblue);
 }
 p.subtitle {
   font-weight: bold;
@@ -143,6 +163,9 @@ p.super-warn {
 }
 p.success, b.success {
   color: darkgreen;
+}
+p.cancelled {
+  text-decoration: line-through;
 }
 p.record {
   color: midnightblue;
@@ -165,6 +188,11 @@ p.super-piece {
 }
 button.insert {
   margin: 5px;
+}
+button.scare {
+  margin: 5px;
+  color: white;
+  background-color: darkred;
 }
 button.chip {
   margin: 5px;
@@ -198,8 +226,11 @@ button.next {
 }
 button.view {
   margin: 5px;
-  color: midnightblue;
-  background-color: powderblue;
+  color: var(--forestgreen);
+  background-color: var(--humblegreen);
+}
+button.btn-fixed-height {
+  height: 10%;
 }
 button.export {
   margin: 5px;
@@ -226,7 +257,7 @@ button.option:hover {
   text-align: center;
 }
 .greybg {
-  background-color: lightgrey;
+  background-color: var(--bggrey);
 }
 .greyborder {
   border: 1px solid lightgrey;
@@ -237,6 +268,9 @@ button.option:hover {
 .side-super-distance {
   padding-left: 5%;
   padding-right: 5%;
+}
+div.right-align {
+  text-align: right;
 }
 div.isolated {
   margin: 2%;

@@ -68,13 +68,14 @@ def create_specification(specification: schemas.SpecificationCreate, db: Session
 
 
 def update_specification(specification: schemas.Specification, db: Session):
-    updated_specification = models.Specification(**jsonable_encoder(specification))
-    print(updated_specification)
+    json_spec = jsonable_encoder(specification)
+    json_spec.pop("vendor", None)
+    update_spec = models.Specification(**json_spec)
     db.query(models.Specification). \
-        filter(models.Specification.id == updated_specification.id). \
-        update(jsonable_encoder(updated_specification))
+        filter(models.Specification.id == update_spec.id). \
+        update(jsonable_encoder(update_spec))
     db.commit()
-    return db.query(models.Specification).filter(models.Specification.id == updated_specification.id).first()
+    return db.query(models.Specification).filter(models.Specification.id == specification.id).first()
 
 
 def delete_specification(specification: schemas.Specification, db: Session):
@@ -83,3 +84,8 @@ def delete_specification(specification: schemas.Specification, db: Session):
         delete(synchronize_session="fetch")
     db.commit()
     return {"success": True, "detail": ''}
+
+
+def get_all_ids(db):
+    return db.query(models.Specification.id).all()
+

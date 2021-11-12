@@ -1,0 +1,13 @@
+<h1 mat-dialog-title>删除确认</h1>
+<div mat-dialog-content>
+  <p>确定要删除以下规格吗（仅该规格删除，不影响配件信息）？</p>
+  <div class="flex-container">
+    <p class="subtitle piece">{{data.spec.id}}</p>
+    <p class="subtitle piece">{{data.compo.name}}</p>
+    <p class="record piece">{{data.spec.vendor?.company || ''}}</p>
+  </div>
+</div>
+<div mat-dialog-actions>
+  <button mat-raised-button color="warn" (click)="onConfirmDelete()">确认删除</button>
+  <button mat-button mat-dialog-close>取消</button>
+</div>

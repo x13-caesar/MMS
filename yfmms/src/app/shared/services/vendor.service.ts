@@ -38,7 +38,19 @@ export class VendorService {
         vendor => vendor.company?.toUpperCase().includes(keyword)
           || vendor.name?.toUpperCase().includes(keyword)
           || vendor.address?.toUpperCase().includes(keyword)
-          || vendor.notice?.toUpperCase().includes(keyword));
+          || vendor.notice?.toUpperCase().includes(keyword)
+          || vendor.id?.toString().includes(keyword));
   }
 
+  vendorAutocompleteFilter(vendors: Vendor[], value: string): Vendor[] {
+    return vendors.filter(v => (v.name.includes(value) || v.company.includes(value)));
+  }
+
+  vendorDisplayFn(vendor: Vendor): string {
+    return vendor && vendor.name ? `${vendor.name} | ${vendor.company}` : '';
+  }
+
+  displayVendorId(id: number): string {
+    return id.toString().padStart(3, '0');
+  }
 }

@@ -40,7 +40,7 @@ def read_unchecked_works(db: Session = Depends(get_db)):
 
 
 @router.get("/batch_process_id/{batch_process_id}")
-def read_works_by_product_id(batch_process_id: int, db: Session = Depends(get_db)):
+def read_works_by_batch_process_id(batch_process_id: int, db: Session = Depends(get_db)):
     works = work_service.get_works_by_batch_process_id(batch_process_id=batch_process_id, db=db)
     return works
 

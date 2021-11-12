@@ -10,6 +10,8 @@ import {environment} from '../../environments/environment';
 import {CreateEmployeeDialogComponent} from './create-employee-dialog/create-employee-dialog.component';
 import {CreateSalaryForOneDialogComponent} from '../salary/create-salary-for-one-dialog/create-salary-for-one-dialog.component';
 import {Salary} from '../shared/models/salary';
+import {CancelBatchConfirmDialogComponent} from '../manufacture/cancel-batch-confirm-dialog/cancel-batch-confirm-dialog.component';
+import {ConfirmEmployeeLeaveDialogComponent} from './confirm-employee-leave-dialog/confirm-employee-leave-dialog.component';
 
 @Component({
   selector: 'app-employee',
@@ -39,7 +41,7 @@ export class EmployeeComponent implements OnInit, AfterViewInit{
   ) { }
 
   ngOnInit(): void {
-    this.employeeService.getEmployees().subscribe(
+    this.employeeService.getEmployeesByStatus('working').subscribe(
       res => {
         this.employeeService.employees = res;
         this.employees = res;
@@ -105,4 +107,20 @@ export class EmployeeComponent implements OnInit, AfterViewInit{
     );
   }
 
+  onEmployeeLeave(emp: Employee) {
+    const dialogRef = this.dialog.open(ConfirmEmployeeLeaveDialogComponent, {
+      width: environment.SMALL_DIALOG_WIDTH,
+      data: {employee: emp}
+    });
+    dialogRef.afterClosed().subscribe(
+      res => {
+        if (!!res) {
+          this.onSuccess('修改员工状态');
+          const idx = this.employees.findIndex(e => e.id === emp.id);
+          this.employees.splice(idx, 1);
+          this.dataSource = new MatTableDataSource<Employee>(this.employees);
+        }
+      }
+    );
+  }
 }

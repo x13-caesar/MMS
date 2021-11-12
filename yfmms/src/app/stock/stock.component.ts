@@ -1,26 +1,21 @@
 import {AfterViewInit, Component, OnInit, ViewChild} from '@angular/core';
-import {APIDataSource} from '../shared/models/api-data-source';
 import {CompoService} from '../shared/services/compo.service';
-import {DataSource} from '@angular/cdk/collections';
-import {Product} from '../shared/models/product';
-import {ProductService} from '../shared/services/product.service';
-import {Observable} from 'rxjs';
-import {Compo} from '../shared/models/compo';
+import {Compo, CompoCategory} from '../shared/models/compo';
 import {animate, state, style, transition, trigger} from '@angular/animations';
-import {SpecService} from '../shared/services/spec.service';
 import {MatPaginator} from '@angular/material/paginator';
 import {MatTableDataSource} from '@angular/material/table';
 import {FormBuilder, FormControl, FormGroup} from '@angular/forms';
-import {CreateVendorDialogComponent} from '../vendor-list/create-vendor-dialog/create-vendor-dialog.component';
 import {environment} from '../../environments/environment';
-import {Vendor} from '../shared/models/vendor';
 import {MatDialog} from '@angular/material/dialog';
-import {MatSnackBar, MatSnackBarModule} from '@angular/material/snack-bar';
+import {MatSnackBar} from '@angular/material/snack-bar';
 import {EditComponentDialogComponent} from './edit-component-dialog/edit-component-dialog.component';
 import {DeleteComponentDialogComponent} from './delete-component-dialog/delete-component-dialog.component';
 import {Spec} from '../shared/models/spec';
 import {EditSpecDialogComponent} from './edit-spec-dialog/edit-spec-dialog.component';
 import {JWTTokenService} from '../shared/services/jwt-token.service';
+import {AddSpecDialogComponent} from './add-spec-dialog/add-spec-dialog.component';
+import {ActivatedRoute} from '@angular/router';
+import {DeleteSpecConfirmDialogComponent} from './delete-spec-confirm-dialog/delete-spec-confirm-dialog.component';
 
 
 @Component({
@@ -37,11 +32,11 @@ import {JWTTokenService} from '../shared/services/jwt-token.service';
 })
 export class StockComponent implements OnInit, AfterViewInit {
   displayedProperties: string[] = [
-    'id', 'name', 'category', 'material', 'description', 'warn_stock', 'edit'
+    'id', 'name', 'category', 'material', 'description', 'fill_period', 'measure', 'warn_stock', 'edit'
   ];
 
   displayedColumns = new Map([['id', '配件编码'], ['name','配件名称'],
-    ['category', '分类'], ['description', '描述'], ['material', '材料'], ['warn_stock', '警示库存'],
+    ['category', '分类'], ['description', '描述'], ['material', '材料'], ['fill_period', '交货周期'], ['measure', '库存单位'], ['warn_stock', '警示库存'],
     ['edit', '操作']]);
 
   compos: Compo[] = [];
@@ -54,7 +49,9 @@ export class StockComponent implements OnInit, AfterViewInit {
   filterGroup!: FormGroup;
 
   materials: (string | undefined)[] = [];
-  categories: string[] = [];
+  categories: CompoCategory[] = [];
+
+  warn_compo_id!: string
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
@@ -63,21 +60,25 @@ export class StockComponent implements OnInit, AfterViewInit {
     private formBuilder: FormBuilder,
     public dialog: MatDialog,
     public _snackBar: MatSnackBar,
-    public jwtTokenService: JWTTokenService
+    public jwtTokenService: JWTTokenService,
+    public route: ActivatedRoute
   ) { }
 
   ngOnInit(): void {
+    this.warn_compo_id = this.route.snapshot.paramMap.get('warn_compo_id') || '';
     this.compoService.getCompos().subscribe(
       res => {
         this.compos = res;
         this.displayCompos = this.compos;
         this.dangerousCompos = this.compos.filter(compo => Number(compo.specification?.reduce((acc, spec) => acc + spec.stock, 0)) < compo.warn_stock);
         this.materials = res.map(compo => compo.material).filter((v, idx, arr) => !!v && arr.indexOf(v) === idx);
-        this.categories = res.map(compo => compo.category).filter((v, idx, arr) => !!v && arr.indexOf(v) === idx);
         this.dataSource = new MatTableDataSource<Compo>(this.displayCompos);
         this.dataSource.paginator = this.paginator;
       }
     );
+    this.compoService.getCompoCategories().subscribe(
+      res => this.categories = res
+    )
     this.filterGroup = this.formBuilder.group({
       keyword: new FormControl(''),
       material: new FormControl(null),
@@ -89,13 +90,20 @@ export class StockComponent implements OnInit, AfterViewInit {
         this.dataSource = new MatTableDataSource<Compo>(this.displayCompos);
       }
     );
+    if (this.warn_compo_id) {
+      this.checkWarns();
+    }
   }
 
   ngAfterViewInit() {
   }
 
   emptyFilter(): void {
-    this.filterGroup.reset()
+    this.filterGroup.setValue({
+      keyword: '',
+      material: null,
+      category: null,
+    })
     this.displayCompos = this.compos;
     this.dataSource = new MatTableDataSource<Compo>(this.displayCompos);
   }
@@ -113,8 +121,10 @@ export class StockComponent implements OnInit, AfterViewInit {
 
     dialogRef.afterClosed().subscribe(updated_compo => {
       if (!!updated_compo) {
-        const idx = this.displayCompos.findIndex(c => c.id === updated_compo.id);
-        this.displayCompos[idx] = {...this.displayCompos[idx], ...updated_compo};
+        const idx1 = this.displayCompos.findIndex(c => c.id === updated_compo.id);
+        this.displayCompos[idx1] = {...this.displayCompos[idx1], ...updated_compo};
+        const idx2 = this.compos.findIndex(c => c.id === updated_compo.id);
+        this.compos[idx2] = {...this.compos[idx2], ...updated_compo};
         this.dataSource = new MatTableDataSource<Compo>(this.displayCompos);
         this.dataSource.paginator = this.paginator;
         this._snackBar.open("修改成功", "关闭")
@@ -141,19 +151,68 @@ export class StockComponent implements OnInit, AfterViewInit {
     });
   }
 
-  openEditSpecDialog(spec: Spec, compo_name: string): void {
+  openEditSpecDialog(spec: Spec, compo: Compo): void {
     const dialogRef = this.dialog.open(EditSpecDialogComponent, {
       width: environment.SMALL_DIALOG_WIDTH,
-      data: {spec: spec, compo_name: compo_name}
+      data: {spec: spec, compo_name: compo.name}
     });
 
     dialogRef.afterClosed().subscribe(updated_spec => {
-      if (!!updated_spec) {
-        const idx = this.displayCompos.findIndex(c => c.id === updated_spec.id);
-        this.displayCompos[idx] = {...this.displayCompos[idx], ...updated_spec};
-        this.dataSource = new MatTableDataSource<Compo>(this.displayCompos);
-        this.dataSource.paginator = this.paginator;
+      if (updated_spec) {
+        spec = {...updated_spec};
+        const spec_idx = compo.specification?.findIndex(s => s.id === spec.id);
+        // @ts-ignore
+        compo.specification[spec_idx] = spec;
+        const idx1 = this.displayCompos.findIndex(c => c.id === compo.id);
+        this.displayCompos[idx1] = {...this.displayCompos[idx1], ...compo};
+        const idx2 = this.compos.findIndex(c => c.id === compo.id);
+        this.compos[idx2] = {...this.compos[idx2], ...compo};
+        // this.dataSource = new MatTableDataSource<Compo>(this.displayCompos);
+        // this.dataSource.paginator = this.paginator;
         this._snackBar.open("修改成功", "关闭")
+      }
+    });
+  }
+
+  openAddSpecDialog(compo: Compo) {
+    const dialogRef = this.dialog.open(AddSpecDialogComponent, {
+      width: environment.SMALL_DIALOG_WIDTH,
+      data: {compo: compo}
+    });
+
+    dialogRef.afterClosed().subscribe(new_spec => {
+      if (new_spec) {
+        console.log(new_spec);
+        compo.specification?.push(new_spec);
+        const idx1 = this.displayCompos.findIndex(c => c.id === compo.id);
+        this.displayCompos[idx1] = {...this.displayCompos[idx1], ...compo};
+        const idx2 = this.compos.findIndex(c => c.id === compo.id);
+        this.compos[idx2] = {...this.compos[idx2], ...compo};
+        // this.dataSource = new MatTableDataSource<Compo>(this.displayCompos);
+        // this.dataSource.paginator = this.paginator;
+        this._snackBar.open("添加成功", "关闭")
+      }
+    });
+  }
+
+  openDeleteSpecDialog(spec: Spec, compo: Compo) {
+    const dialogRef = this.dialog.open(DeleteSpecConfirmDialogComponent, {
+      width: environment.LARGE_DIALOG_WIDTH,
+      data: {spec: spec, compo: compo}
+    });
+
+    dialogRef.afterClosed().subscribe(res => {
+      if (!!res) {
+        const idx = compo.specification?.findIndex(s => s.id === spec.id);
+        if (idx! > -1) {
+          compo.specification?.slice(idx, 1);
+          const idx1 = this.displayCompos.findIndex(c => c.id === compo.id);
+          this.displayCompos[idx1] = {...this.displayCompos[idx1], ...compo};
+          const idx2 = this.compos.findIndex(c => c.id === compo.id);
+          this.compos[idx2] = {...this.compos[idx2], ...compo};
+          this.dataSource = new MatTableDataSource<Compo>(this.displayCompos);
+          this._snackBar.open("删除成功", "关闭")
+        }
       }
     });
   }
